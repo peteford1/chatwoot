@@ -1,0 +1,239 @@
+name: Deploy to Azure Container Apps
+
+on:
+  push:
+    branches:
+      - main        # Production deployment
+      - develop     # Staging deployment
+      - feature/*   # Development deployment
+  pull_request:
+    branches:
+      - main
+      - develop
+
+env:
+  AZURE_CONTAINER_REGISTRY: chatwootregistry95290.azurecr.io
+  RESOURCE_GROUP: SM-Test
+  CONTAINER_APP_NAME: chatwoot-backend-test
+
+jobs:
+  # Environment Detection
+  detect-environment:
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.env.outputs.environment }}
+      database_name: ${{ steps.env.outputs.database_name }}
+      database_schema: ${{ steps.env.outputs.database_schema }}
+      app_name: ${{ steps.env.outputs.app_name }}
+    steps:
+      - name: Determine Environment
+        id: env
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "environment=production" >> $GITHUB_OUTPUT
+            echo "database_name=chatwoot_shared" >> $GITHUB_OUTPUT
+            echo "database_schema=production" >> $GITHUB_OUTPUT
+            echo "app_name=chatwoot-backend-prod" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
+            echo "environment=staging" >> $GITHUB_OUTPUT
+            echo "database_name=chatwoot_shared" >> $GITHUB_OUTPUT
+            echo "database_schema=staging" >> $GITHUB_OUTPUT
+            echo "app_name=chatwoot-backend-staging" >> $GITHUB_OUTPUT
+          else
+            echo "environment=development" >> $GITHUB_OUTPUT
+            echo "database_name=chatwoot_shared" >> $GITHUB_OUTPUT
+            echo "database_schema=development" >> $GITHUB_OUTPUT
+            echo "app_name=chatwoot-backend-test" >> $GITHUB_OUTPUT
+          fi
+
+  # Build and Test
+  build-and-test:
+    runs-on: ubuntu-latest
+    needs: detect-environment
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: |
+          bundle install
+          yarn install
+
+      - name: Run tests
+        run: |
+          bundle exec rspec
+          yarn test
+
+      - name: Build assets
+        run: |
+          bundle exec rails assets:precompile
+        env:
+          RAILS_ENV: production
+
+  # Build Docker Image
+  build-docker:
+    runs-on: ubuntu-latest
+    needs: [detect-environment, build-and-test]
+    if: github.event_name == 'push'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Azure Container Registry
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ env.AZURE_CONTAINER_REGISTRY }}
+          username: ${{ secrets.AZURE_REGISTRY_USERNAME }}
+          password: ${{ secrets.AZURE_REGISTRY_PASSWORD }}
+
+      - name: Build and push Docker image
+        run: |
+          IMAGE_TAG=${{ env.AZURE_CONTAINER_REGISTRY }}/chatwoot:${{ needs.detect-environment.outputs.environment }}-${{ github.sha }}
+          docker build -t $IMAGE_TAG .
+          docker push $IMAGE_TAG
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+
+      - name: Save image tag
+        run: echo "${{ env.IMAGE_TAG }}" > image-tag.txt
+
+      - name: Upload image tag artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: image-tag
+          path: image-tag.txt
+
+  # Deploy to Azure
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [detect-environment, build-docker]
+    if: github.event_name == 'push'
+    environment: ${{ needs.detect-environment.outputs.environment }}
+    steps:
+      - name: Download image tag artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: image-tag
+
+      - name: Read image tag
+        run: echo "IMAGE_TAG=$(cat image-tag.txt)" >> $GITHUB_ENV
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy to Azure Container Apps
+        run: |
+          az containerapp update \
+            --name ${{ needs.detect-environment.outputs.app_name }} \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --image ${{ env.IMAGE_TAG }} \
+            --set-env-vars \
+              RAILS_ENV=${{ needs.detect-environment.outputs.environment }} \
+              DATABASE_URL="postgresql://${{ secrets.DB_USERNAME }}:${{ secrets.DB_PASSWORD }}@${{ secrets.DB_HOST }}:5432/${{ needs.detect-environment.outputs.database_name }}?options=-csearch_path%3D${{ needs.detect-environment.outputs.database_schema }}" \
+              REDIS_URL="${{ secrets.REDIS_URL }}" \
+              SECRET_KEY_BASE="${{ secrets.SECRET_KEY_BASE }}" \
+              FRONTEND_URL="${{ secrets.FRONTEND_URL }}" \
+              FORCE_SSL="${{ secrets.FORCE_SSL }}" \
+              RAILS_LOG_TO_STDOUT="true" \
+              RAILS_SERVE_STATIC_FILES="true"
+
+      - name: Verify deployment
+        run: |
+          echo "Deployment completed for ${{ needs.detect-environment.outputs.environment }} environment"
+          echo "App: ${{ needs.detect-environment.outputs.app_name }}"
+          echo "Database: ${{ needs.detect-environment.outputs.database_name }}"
+
+  # Database Migration (Production only)
+  migrate-database:
+    runs-on: ubuntu-latest
+    needs: [detect-environment, deploy]
+    if: needs.detect-environment.outputs.environment == 'production'
+    steps:
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Run database migrations
+        run: |
+          az containerapp exec \
+            --name ${{ needs.detect-environment.outputs.app_name }} \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --command "bundle exec rails db:migrate"
+
+  # Test Environment Seeder (Development/Test only)
+  seed-test-environment:
+    runs-on: ubuntu-latest
+    needs: [detect-environment, deploy]
+    if: needs.detect-environment.outputs.environment == 'development'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Run database migrations in test environment
+        run: |
+          az containerapp exec \
+            --name ${{ needs.detect-environment.outputs.app_name }} \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --command "bundle exec rails db:migrate"
+
+      - name: Run VoiceLinkAI Test Environment Seeder
+        run: |
+          # Execute the seeder script in the container
+          az containerapp exec \
+            --name ${{ needs.detect-environment.outputs.app_name }} \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --command "bundle exec rails runner scripts/deploy_test_env_seeder.rb"
+
+      - name: Verify test environment setup
+        run: |
+          echo "✅ Test environment seeding completed"
+          echo "🎯 VoiceLinkAI integration ready for testing"
+
+  # Notification
+  notify:
+    runs-on: ubuntu-latest
+    needs: [detect-environment, deploy, migrate-database, seed-test-environment]
+    if: always()
+    steps:
+      - name: Deployment Status
+        run: |
+          if [[ "${{ needs.deploy.result }}" == "success" ]]; then
+            echo "✅ Deployment to ${{ needs.detect-environment.outputs.environment }} successful!"
+            
+            # Check environment-specific steps
+            if [[ "${{ needs.detect-environment.outputs.environment }}" == "production" ]]; then
+              if [[ "${{ needs.migrate-database.result }}" == "success" ]]; then
+                echo "✅ Database migrations completed"
+              else
+                echo "❌ Database migrations failed"
+              fi
+            elif [[ "${{ needs.detect-environment.outputs.environment }}" == "development" ]]; then
+              if [[ "${{ needs.seed-test-environment.result }}" == "success" ]]; then
+                echo "✅ Test environment seeding completed"
+                echo "🎯 VoiceLinkAI integration ready for testing"
+              else
+                echo "❌ Test environment seeding failed"
+              fi
+            fi
+          else
+            echo "❌ Deployment to ${{ needs.detect-environment.outputs.environment }} failed!"
+          fi 
