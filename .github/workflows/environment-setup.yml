@@ -46,33 +46,33 @@ jobs:
         run: |
           ENV_NAME="${{ github.event.inputs.environment }}"
           
-          # Load from environments.yml
+          # Use the existing test container for all environments, but configure different database schemas
+          echo "container_app_name=chatwoot-backend-test" >> $GITHUB_OUTPUT
+          
           case $ENV_NAME in
             "development")
               echo "database_name=chatwoot_shared" >> $GITHUB_OUTPUT
               echo "database_schema=development" >> $GITHUB_OUTPUT
-              echo "container_app_name=chatwoot-backend-dev" >> $GITHUB_OUTPUT
               echo "rails_env=development" >> $GITHUB_OUTPUT
               ;;
             "test")
               echo "database_name=chatwoot_shared" >> $GITHUB_OUTPUT
               echo "database_schema=test" >> $GITHUB_OUTPUT
-              echo "container_app_name=chatwoot-backend-test" >> $GITHUB_OUTPUT
               echo "rails_env=test" >> $GITHUB_OUTPUT
               ;;
             "staging")
               echo "database_name=chatwoot_shared" >> $GITHUB_OUTPUT
               echo "database_schema=staging" >> $GITHUB_OUTPUT
-              echo "container_app_name=chatwoot-backend-staging" >> $GITHUB_OUTPUT
               echo "rails_env=staging" >> $GITHUB_OUTPUT
               ;;
             "production")
               echo "database_name=chatwoot_production" >> $GITHUB_OUTPUT
               echo "database_schema=public" >> $GITHUB_OUTPUT
-              echo "container_app_name=chatwoot-backend-prod" >> $GITHUB_OUTPUT
               echo "rails_env=production" >> $GITHUB_OUTPUT
               ;;
           esac
+          
+          echo "Using container: chatwoot-backend-test for environment: $ENV_NAME"
 
   setup-environment:
     runs-on: ubuntu-latest
