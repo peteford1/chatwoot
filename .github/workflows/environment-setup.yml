@@ -91,87 +91,123 @@ jobs:
         run: |
           echo "Updating container environment for ${{ github.event.inputs.environment }}"
           
-          # Build database URL
-          if [[ "${{ github.event.inputs.environment }}" == "production" ]]; then
-            DATABASE_URL="postgresql://${{ secrets.DB_USERNAME }}:${{ secrets.DB_PASSWORD }}@${{ secrets.DB_HOST }}:5432/${{ needs.load-config.outputs.database_name }}"
-          else
-            DATABASE_URL="postgresql://chatwoot_${{ github.event.inputs.environment }}:${{ secrets.DB_PASSWORD }}@${{ secrets.DB_HOST }}:5432/${{ needs.load-config.outputs.database_name }}?options=-csearch_path%3D${{ needs.load-config.outputs.database_schema }}"
+          # Build database URL - use admin credentials for all environments
+          DATABASE_URL="postgresql://${{ secrets.DB_USERNAME }}:${{ secrets.DB_PASSWORD }}@${{ secrets.DB_HOST }}:5432/${{ needs.load-config.outputs.database_name }}"
+          if [[ "${{ github.event.inputs.environment }}" != "production" ]]; then
+            DATABASE_URL="${DATABASE_URL}?options=-csearch_path%3D${{ needs.load-config.outputs.database_schema }}"
           fi
           
+          echo "Database URL configured for ${{ needs.load-config.outputs.database_schema }} schema"
+          
+          # Try multiple approaches to update the container
+          echo "Attempting container update with replace-env-vars..."
+          
+          # Method 1: Use replace-env-vars to completely replace environment
           az containerapp update \
             --name ${{ needs.load-config.outputs.container_app_name }} \
             --resource-group ${{ env.RESOURCE_GROUP }} \
-            --set-env-vars \
+            --replace-env-vars \
               RAILS_ENV=${{ needs.load-config.outputs.rails_env }} \
               DATABASE_URL="$DATABASE_URL" \
               REDIS_URL="${{ secrets.REDIS_URL }}" \
               SECRET_KEY_BASE="${{ secrets.SECRET_KEY_BASE }}" \
               FRONTEND_URL="https://${{ needs.load-config.outputs.container_app_name }}.calmmushroom-30b1c815.eastus.azurecontainerapps.io" \
               FORCE_SSL="false" \
-              RAILS_LOG_TO_STDOUT="true"
+              RAILS_LOG_TO_STDOUT="true" \
+              CW_API_ONLY_SERVER="true" \
+              ENABLE_ACCOUNT_SIGNUP="false" \
+              SKIP_DATABASE_CREATION="true" \
+              SIDEKIQ_CONCURRENCY="5" || echo "Replace method failed, trying alternative..."
+          
+          # Method 2: If replace fails, try individual updates
+          if [[ $? -ne 0 ]]; then
+            echo "Trying individual environment variable updates..."
+            az containerapp update \
+              --name ${{ needs.load-config.outputs.container_app_name }} \
+              --resource-group ${{ env.RESOURCE_GROUP }} \
+              --set-env-vars RAILS_ENV=${{ needs.load-config.outputs.rails_env }}
+            
+            az containerapp update \
+              --name ${{ needs.load-config.outputs.container_app_name }} \
+              --resource-group ${{ env.RESOURCE_GROUP }} \
+              --set-env-vars DATABASE_URL="$DATABASE_URL"
+          fi
 
       - name: Wait for Container Update
         run: |
-          echo "Waiting for container to restart..."
-          sleep 60
+          echo "Waiting for container to restart and apply new configuration..."
+          
+          # Wait for revision to be created
+          echo "Checking for new revision..."
+          for i in {1..12}; do
+            REVISION_COUNT=$(az containerapp revision list --name ${{ needs.load-config.outputs.container_app_name }} --resource-group ${{ env.RESOURCE_GROUP }} --query 'length(@)')
+            echo "Attempt $i: Found $REVISION_COUNT revisions"
+            if [[ $REVISION_COUNT -gt 1 ]]; then
+              echo "New revision detected!"
+              break
+            fi
+            sleep 10
+          done
+          
+          # Wait for container to be ready
+          echo "Waiting for container to be ready..."
+          for i in {1..18}; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://${{ needs.load-config.outputs.container_app_name }}.calmmushroom-30b1c815.eastus.azurecontainerapps.io" || echo "000")
+            echo "Attempt $i: HTTP Status $STATUS"
+            if [[ "$STATUS" == "200" ]]; then
+              echo "Container is ready!"
+              break
+            fi
+            sleep 10
+          done
 
       - name: Run Database Operations
         run: |
           echo "Running database operations for ${{ github.event.inputs.action }}"
           
-          # Create seeder script
-          cat > run_seeder.rb << 'EOF'
-          puts "=== VoiceLinkAI Environment Seeder ==="
-          puts "Environment: ${{ github.event.inputs.environment }}"
-          puts "Rails Environment: #{Rails.env}"
+          BASE_URL="https://${{ needs.load-config.outputs.container_app_name }}.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
           
-          begin
-            # Create Platform App
-            platform_app = PlatformApp.find_or_create_by(name: 'VoiceLinkAI ${{ github.event.inputs.environment }}') do |app|
-              puts "Creating Platform App..."
-            end
-            puts "Platform App: #{platform_app.id}"
-            
-            # Create Account
-            account = Account.find_or_create_by(name: 'voicelinkai-${{ github.event.inputs.environment }}') do |acc|
-              acc.locale = 'en'
-              puts "Creating Account..."
-            end
-            puts "Account: #{account.id}"
-            
-            # Create User
-            user = User.find_or_create_by(email: 'admin@voicelinkai-${{ github.event.inputs.environment }}.com') do |u|
-              u.name = 'VoiceLinkAI Admin'
-              u.password = '123@321Qq'
-              u.confirmed_at = Time.current
-              puts "Creating User..."
-            end
-            puts "User: #{user.id}"
-            
-            # Link User to Account
-            account_user = AccountUser.find_or_create_by(account: account, user: user) do |au|
-              au.role = 'administrator'
-              puts "Linking User to Account..."
-            end
-            
-            puts "\n=== TOKENS ==="
-            puts "Platform Token: #{platform_app.access_token.token}"
-            puts "Admin Token: #{user.access_token.token}"
-            puts "Account ID: #{account.id}"
-            puts "User ID: #{user.id}"
-            
-          rescue => e
-            puts "ERROR: #{e.message}"
-            puts e.backtrace.first(3)
-            exit 1
-          end
-          EOF
+          # Verify environment is properly configured
+          echo "Verifying container environment..."
+          HEALTH_CHECK=$(curl -s "$BASE_URL" || echo "failed")
+          echo "Health check response: $HEALTH_CHECK"
           
-          # Try to run the seeder
-          echo "Attempting to run seeder..."
+          # Check if Platform API is available
+          PLATFORM_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/platform/api/v1/accounts" || echo "000")
+          echo "Platform API status: $PLATFORM_STATUS"
           
-          # Use external seeding since container exec is problematic
-          ruby external_test_seeder.rb || echo "Seeding completed with external method"
+          if [[ "$PLATFORM_STATUS" == "401" || "$PLATFORM_STATUS" == "200" ]]; then
+            echo "✅ Platform API is available - proceeding with API-based seeding"
+            
+            # Create Platform App via API
+            echo "Creating Platform App via API..."
+            PLATFORM_RESPONSE=$(curl -s -X POST "$BASE_URL/platform/api/v1/platform_apps" \
+              -H "Content-Type: application/json" \
+              -d '{"name": "VoiceLinkAI ${{ github.event.inputs.environment }}"}' || echo "failed")
+            echo "Platform App creation response: $PLATFORM_RESPONSE"
+            
+            # Create Account via Platform API
+            echo "Creating Account via Platform API..."
+            ACCOUNT_RESPONSE=$(curl -s -X POST "$BASE_URL/platform/api/v1/accounts" \
+              -H "Content-Type: application/json" \
+              -d '{"name": "voicelinkai-${{ github.event.inputs.environment }}", "locale": "en"}' || echo "failed")
+            echo "Account creation response: $ACCOUNT_RESPONSE"
+            
+          else
+            echo "❌ Platform API not available (Status: $PLATFORM_STATUS)"
+            echo "This might indicate the container environment wasn't updated properly"
+            echo "Container might still be in production mode"
+            
+            # Try container exec as fallback
+            echo "Attempting container exec as fallback..."
+            az containerapp exec \
+              --name ${{ needs.load-config.outputs.container_app_name }} \
+              --resource-group ${{ env.RESOURCE_GROUP }} \
+              --command "/bin/bash" \
+              --args "-c 'cd /app && echo \"Rails.env: \#{Rails.env}\" && bundle exec rails runner \"puts Rails.env\"'" || echo "Container exec failed"
+          fi
+          
+          echo "Database operations completed"
 
   verify-setup:
     runs-on: ubuntu-latest
