@@ -127,7 +127,7 @@ jobs:
           
           begin
             # Create Platform App
-            platform_app = PlatformApp.find_or_create_by(name: 'VoiceLinkAI ${{ github.event.inputs.environment | capitalize }}') do |app|
+            platform_app = PlatformApp.find_or_create_by(name: 'VoiceLinkAI ${{ github.event.inputs.environment }}') do |app|
               puts "Creating Platform App..."
             end
             puts "Platform App: #{platform_app.id}"
