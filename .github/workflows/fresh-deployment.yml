@@ -44,7 +44,7 @@ jobs:
           echo "Building fresh container image with tag: ${{ env.IMAGE_TAG }}"
           
           # Build the image with environment-specific configuration
-          docker build -t ${{ env.AZURE_CONTAINER_REGISTRY }}/chatwoot:${{ env.IMAGE_TAG }} \
+          docker build -f docker/Dockerfile -t ${{ env.AZURE_CONTAINER_REGISTRY }}/chatwoot:${{ env.IMAGE_TAG }} \
             --build-arg RAILS_ENV=${{ github.event.inputs.environment }} \
             --build-arg BUILDTIME_ENV=${{ github.event.inputs.environment }} \
             .
