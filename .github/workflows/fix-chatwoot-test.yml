@@ -1,0 +1,107 @@
+name: Fix Chatwoot Test Environment
+
+on:
+  workflow_dispatch:
+
+env:
+  AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+  RESOURCE_GROUP: SM-Test
+  ENVIRONMENT: chatwoot-env-test
+  LOCATION: eastus
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Delete existing container if exists
+      continue-on-error: true
+      run: |
+        az containerapp delete \
+          --name chatwoot-test \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --yes
+
+    - name: Deploy Chatwoot Test Container App with Redis
+      run: |
+        az containerapp create \
+          --name chatwoot-test \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --environment ${{ env.ENVIRONMENT }} \
+          --yaml - << 'EOF'
+        location: eastus
+        resourceGroup: SM-Test
+        properties:
+          environmentId: /subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.App/managedEnvironments/chatwoot-env-test
+          configuration:
+            ingress:
+              external: true
+              targetPort: 3000
+              traffic:
+              - weight: 100
+                latestRevision: true
+          template:
+            containers:
+            - name: chatwoot-backend
+              image: chatwoot/chatwoot:latest
+              env:
+              - name: RAILS_ENV
+                value: production
+              - name: DATABASE_URL
+                value: postgresql://chatwootuser:ChatwootSecure2025!@chatwoot-db-fresh.postgres.database.azure.com:5432/chatwoot_shared?sslmode=require
+              - name: REDIS_URL
+                value: redis://localhost:6379
+              - name: SECRET_KEY_BASE
+                value: bb02bd4083fc907af6a7857e937af9067e1c68fde8995e90186545bb34e945f1
+              - name: FRONTEND_URL
+                value: https://chatwoot-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io
+              - name: FORCE_SSL
+                value: "false"
+              - name: RAILS_LOG_TO_STDOUT
+                value: "true"
+              - name: RAILS_SERVE_STATIC_FILES
+                value: "true"
+              - name: MAILER_SENDER_EMAIL
+                value: admin@voicelinkai.com
+              - name: ENABLE_ACCOUNT_SIGNUP
+                value: "false"
+              - name: INSTALLATION_NAME
+                value: VoiceLink AI Chatwoot
+              resources:
+                cpu: 1.0
+                memory: 2.0Gi
+            - name: redis
+              image: redis:7-alpine
+              command:
+              - redis-server
+              - --appendonly
+              - "yes"
+              - --maxmemory
+              - 256mb
+              - --maxmemory-policy
+              - allkeys-lru
+              resources:
+                cpu: 0.25
+                memory: 0.5Gi
+            scale:
+              minReplicas: 1
+              maxReplicas: 1
+        EOF
+
+    - name: Wait for container to be ready
+      run: |
+        echo "Waiting for container to start..."
+        sleep 120
+
+    - name: Test container health
+      run: |
+        echo "Testing container health..."
+        curl -f https://chatwoot-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io/health || echo "Health check failed" 
