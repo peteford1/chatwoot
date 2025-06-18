@@ -139,6 +139,9 @@ jobs:
         SEED_USER_EMAIL: ${{ github.event.inputs.admin_email || 'admin@voicelinkai.com' }}
         SEED_USER_PASSWORD: ${{ secrets.ADMIN_PASSWORD || 'Password1!' }}
         SEED_USER_NAME: ${{ github.event.inputs.admin_name || 'Admin User' }}
+        SEED_STORE_ADMIN_EMAIL: 'storeadmin@voicelinkai.com'
+        SEED_STORE_ADMIN_PASSWORD: ${{ secrets.STORE_ADMIN_PASSWORD || 'Password1!' }}
+        SEED_STORE_ADMIN_NAME: 'Store Admin'
         FRONTEND_URL: "https://${{ github.event.inputs.container_name }}.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
       run: |
         echo "Running production seeder to create initial account and user..."
@@ -319,12 +322,13 @@ jobs:
         echo "🎯 Environment: ${{ github.event.inputs.environment }}"
         echo ""
         echo "🔐 Login Credentials:"
-        echo "   Email: ${{ github.event.inputs.admin_email || 'admin@voicelinkai.com' }}"
-        echo "   Password: ${{ secrets.ADMIN_PASSWORD || 'Password1!' }}"
+        echo "   Super Admin - Email: ${{ github.event.inputs.admin_email || 'admin@voicelinkai.com' }}, Password: ${{ secrets.ADMIN_PASSWORD || 'Password1!' }}"
+        echo "   Store Admin - Email: storeadmin@voicelinkai.com, Password: ${{ secrets.STORE_ADMIN_PASSWORD || 'Password1!' }}"
         echo ""
         echo "📋 Account Details:"
         echo "   Account Name: ${{ github.event.inputs.account_name || 'VoiceLink AI' }}"
-        echo "   Admin User: ${{ github.event.inputs.admin_name || 'Admin User' }}"
+        echo "   Super Admin: ${{ github.event.inputs.admin_name || 'Admin User' }}"
+        echo "   Store Admin: Store Admin"
         echo ""
         echo "Next steps:"
         echo "1. Access the application at: https://$CONTAINER_URL"

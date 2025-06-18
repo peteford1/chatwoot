@@ -14,6 +14,11 @@ class ProductionSeeder
     @user_email = ENV['SEED_USER_EMAIL'] || 'admin@voicelinkai.com'
     @user_password = ENV['SEED_USER_PASSWORD'] || 'Password1!'
     @user_name = ENV['SEED_USER_NAME'] || 'Admin User'
+    
+    # Store admin user details
+    @store_admin_email = ENV['SEED_STORE_ADMIN_EMAIL'] || 'storeadmin@voicelinkai.com'
+    @store_admin_password = ENV['SEED_STORE_ADMIN_PASSWORD'] || 'Password1!'
+    @store_admin_name = ENV['SEED_STORE_ADMIN_NAME'] || 'Store Admin'
   end
 
   def seed!
@@ -30,19 +35,23 @@ class ProductionSeeder
     # Create admin user if it doesn't exist
     user = find_or_create_user
     
-    # Create account-user relationship
-    create_account_user_relationship(account, user)
+    # Create store admin user if it doesn't exist
+    store_admin = find_or_create_store_admin
     
-    # Create default inbox
-    create_default_inbox(account, user)
+    # Create account-user relationships
+    create_account_user_relationship(account, user)
+    create_account_user_relationship(account, store_admin)
     
     puts "✅ Production seeding completed successfully!"
     puts "📊 Summary:"
     puts "   - Account: #{account.name} (ID: #{account.id})"
-    puts "   - Admin User: #{user.name} <#{user.email}> (ID: #{user.id})"
+    puts "   - Super Admin: #{user.name} <#{user.email}> (ID: #{user.id})"
+    puts "   - Store Admin: #{store_admin.name} <#{store_admin.email}> (ID: #{store_admin.id})"
     puts "   - Login URL: #{ENV['FRONTEND_URL'] || 'https://your-chatwoot-domain.com'}"
-    puts "   - Email: #{user.email}"
-    puts "   - Password: #{@user_password}"
+    puts ""
+    puts "🔐 Login Credentials:"
+    puts "   Super Admin - Email: #{user.email}, Password: #{@user_password}"
+    puts "   Store Admin - Email: #{store_admin.email}, Password: #{@store_admin_password}"
   end
 
   private
@@ -65,9 +74,9 @@ class ProductionSeeder
     user = User.find_by(email: @user_email)
     
     if user
-      puts "👤 Found existing user: #{user.email}"
+      puts "👤 Found existing super admin user: #{user.email}"
     else
-      puts "👤 Creating admin user: #{@user_email}"
+      puts "👤 Creating super admin user: #{@user_email}"
       user = User.new(
         name: @user_name,
         email: @user_email,
@@ -76,10 +85,31 @@ class ProductionSeeder
       )
       user.skip_confirmation!
       user.save!
-      puts "✅ Admin user created: #{user.name} <#{user.email}> (ID: #{user.id})"
+      puts "✅ Super admin user created: #{user.name} <#{user.email}> (ID: #{user.id})"
     end
     
     user
+  end
+
+  def find_or_create_store_admin
+    store_admin = User.find_by(email: @store_admin_email)
+    
+    if store_admin
+      puts "👤 Found existing store admin user: #{store_admin.email}"
+    else
+      puts "👤 Creating store admin user: #{@store_admin_email}"
+      store_admin = User.new(
+        name: @store_admin_name,
+        email: @store_admin_email,
+        password: @store_admin_password,
+        type: 'User'
+      )
+      store_admin.skip_confirmation!
+      store_admin.save!
+      puts "✅ Store admin user created: #{store_admin.name} <#{store_admin.email}> (ID: #{store_admin.id})"
+    end
+    
+    store_admin
   end
 
   def create_account_user_relationship(account, user)
@@ -98,33 +128,7 @@ class ProductionSeeder
     end
   end
 
-  def create_default_inbox(account, user)
-    # Check if account already has inboxes
-    if account.inboxes.any?
-      puts "📥 Account already has #{account.inboxes.count} inbox(es)"
-      return
-    end
 
-    puts "📥 Creating default web widget inbox..."
-    
-    # Create web widget channel
-    web_widget = Channel::WebWidget.create!(
-      account: account,
-      website_url: ENV['FRONTEND_URL'] || 'https://your-chatwoot-domain.com'
-    )
-    
-    # Create inbox
-    inbox = Inbox.create!(
-      channel: web_widget,
-      account: account,
-      name: "#{account.name} Support"
-    )
-    
-    # Add admin user to inbox
-    InboxMember.create!(user: user, inbox: inbox)
-    
-    puts "✅ Default inbox created: #{inbox.name} (ID: #{inbox.id})"
-  end
 end
 
 # Run seeder if called directly

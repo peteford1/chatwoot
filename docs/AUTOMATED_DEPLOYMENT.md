@@ -35,7 +35,8 @@ Set up these secrets in your GitHub repository (`Settings > Secrets and variable
 | `DB_PASSWORD` | PostgreSQL password | `Sunnymead123!` |
 | `SECRET_KEY_BASE` | Rails secret key | `supersecretkeybasefortest123456789abcdefghijklmnopqrstuvwxyz` |
 | `REDIS_URL` | Redis connection string | `rediss://default:PASSWORD@chatwoot-redis.redis.cache.windows.net:6380` |
-| `ADMIN_PASSWORD` | Initial admin user password | `Password1!` (optional, defaults to Password1!) |
+| `ADMIN_PASSWORD` | Initial super admin user password | `Password1!` (optional, defaults to Password1!) |
+| `STORE_ADMIN_PASSWORD` | Store admin user password | `Password1!` (optional, defaults to Password1!) |
 
 ## How to Use the Workflow
 
@@ -68,7 +69,9 @@ Set up these secrets in your GitHub repository (`Settings > Secrets and variable
 - ✅ Runs `rails db:chatwoot_prepare` only if needed
 - ✅ Verifies successful preparation
 - ✅ Checks if accounts/users exist
-- ✅ Runs production seeder to create initial account and admin user
+- ✅ Runs production seeder to create initial account and users
+- ✅ Creates super admin user with full privileges
+- ✅ Creates store admin user with administrator role
 - ✅ Verifies seeding results
 
 ### Stage 2: Container Deployment

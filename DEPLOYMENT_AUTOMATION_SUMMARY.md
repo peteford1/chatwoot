@@ -8,6 +8,13 @@
 - ✅ Verification (ensures 77+ tables created)
 - ✅ Connection testing before and after
 
+### 2. Account & User Seeding
+- ✅ Checks for existing accounts/users
+- ✅ Creates initial account (configurable name)
+- ✅ Creates admin user with SuperAdmin privileges
+- ✅ Sets up default web widget inbox
+- ✅ Provides login credentials in output
+
 ### 2. Container Deployment
 - ✅ Azure Container Apps creation
 - ✅ Official `chatwoot/chatwoot:latest` image
