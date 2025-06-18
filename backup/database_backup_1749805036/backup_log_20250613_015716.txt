@@ -1,0 +1,22 @@
+ERROR: the following arguments are required: --name/-n
+
+Examples from AI knowledge base:
+az postgres flexible-server backup list -g testgroup -n testsvr
+List all backups for 'testsvr'.
+
+https://aka.ms/cli_ref
+Read more about the command in reference docs
+ERROR: the following arguments are required: --name/-n
+
+Examples from AI knowledge base:
+az postgres flexible-server backup create -g testgroup -n testsvr --backup-name testbackup
+Create a backup.
+
+
+https://aka.ms/cli_ref
+Read more about the command in reference docs
+ERROR: unrecognized arguments: --server-name chatwoot-db-fresh
+
+Examples from AI knowledge base:
+https://aka.ms/cli_ref
+Read more about the command in reference docs

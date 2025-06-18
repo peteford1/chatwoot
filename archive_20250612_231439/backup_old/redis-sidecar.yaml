@@ -1,0 +1,64 @@
+location: eastus
+resourceGroup: SM-Test
+properties:
+  environmentId: /subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.App/managedEnvironments/chatwoot-env-test
+  configuration:
+    ingress:
+      external: true
+      targetPort: 3000
+      traffic:
+      - weight: 100
+        latestRevision: true
+  template:
+    containers:
+    - name: chatwoot-backend
+      image: chatwoot/chatwoot:latest
+      command:
+      - /bin/sh
+      args:
+      - -c
+      - bundle exec rails db:prepare && bundle exec rails server -b 0.0.0.0 -p 3000
+      env:
+      - name: RAILS_ENV
+        value: production
+      - name: CW_API_ONLY_SERVER
+        value: "true"
+      - name: DATABASE_URL
+        value: postgresql://chatwootuser:chatwoot123@chatwoot-db-new.postgres.database.azure.com/chatwoot_production
+      - name: REDIS_URL
+        value: redis://localhost:6379
+      - name: SECRET_KEY_BASE
+        value: 6c2b6b1b8f8b1b1b8f8b1b1b8f8b1b1b8f8b1b1b8f8b1b1b8f8b1b1b8f8b1b1b
+      - name: FRONTEND_URL
+        value: https://your-frontend-domain.com
+      - name: FORCE_SSL
+        value: "false"
+      - name: RAILS_LOG_TO_STDOUT
+        value: "true"
+      - name: MAILER_SENDER_EMAIL
+        value: noreply@yourdomain.com
+      - name: SMTP_DOMAIN
+        value: yourdomain.com
+      - name: ENABLE_ACCOUNT_SIGNUP
+        value: "false"
+      - name: SKIP_DATABASE_CREATION
+        value: "true"
+      resources:
+        cpu: 0.75
+        memory: 1.5Gi
+    - name: redis
+      image: redis:7-alpine
+      command:
+      - redis-server
+      - --appendonly
+      - "yes"
+      - --maxmemory
+      - 256mb
+      - --maxmemory-policy
+      - allkeys-lru
+      resources:
+        cpu: 0.25
+        memory: 0.5Gi
+    scale:
+      minReplicas: 1
+      maxReplicas: 1 

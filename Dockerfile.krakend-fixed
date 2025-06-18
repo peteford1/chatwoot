@@ -1,0 +1,17 @@
+FROM devopsfaith/krakend:2.4
+
+# Copy the fixed KrakenD configuration
+COPY krakend.json /etc/krakend/krakend.json
+
+# Copy Lua transformation scripts
+COPY auth_transform.lua /etc/krakend/auth_transform.lua
+COPY admin_auth_transform.lua /etc/krakend/admin_auth_transform.lua
+COPY general_webhook_transform.lua /etc/krakend/general_webhook_transform.lua
+COPY twilio_webhook_transform.lua /etc/krakend/twilio_webhook_transform.lua
+COPY profile_auth_transform.lua /etc/krakend/profile_auth_transform.lua
+
+# Expose port 8080 (HTTP only, no HTTPS since Cloudflare handles SSL)
+EXPOSE 8080
+
+# Start KrakenD
+CMD ["krakend", "run", "-c", "/etc/krakend/krakend.json"] 

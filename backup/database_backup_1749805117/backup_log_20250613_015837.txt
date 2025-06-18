@@ -1,0 +1,9 @@
+ERROR: (ResourceGroupNotFound) Resource group 'chatwoot-rg' could not be found.
+Code: ResourceGroupNotFound
+Message: Resource group 'chatwoot-rg' could not be found.
+ERROR: (ResourceGroupNotFound) Resource group 'chatwoot-rg' could not be found.
+Code: ResourceGroupNotFound
+Message: Resource group 'chatwoot-rg' could not be found.
+ERROR: (ResourceGroupNotFound) Resource group 'chatwoot-rg' could not be found.
+Code: ResourceGroupNotFound
+Message: Resource group 'chatwoot-rg' could not be found.

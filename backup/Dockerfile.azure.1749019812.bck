@@ -1,0 +1,22 @@
+# Custom Dockerfile for Azure Container Apps with Action Cable fix
+# Created: 2025-06-03 23:57:00
+# Purpose: Deploy Chatwoot with Action Cable enabled for real-time functionality
+
+FROM chatwoot/chatwoot:latest
+
+# Copy our updated CORS configuration with Action Cable enabled
+COPY config/initializers/cors.rb /app/config/initializers/cors.rb
+
+# Copy updated routes with ActionCable mount for WebSocket functionality
+# 2025-06-04 06:30:00 - Added routes.rb copy to enable /cable endpoint for real-time features
+# Previous: routes.rb not copied, ActionCable mount missing from container
+COPY config/routes.rb /app/config/routes.rb
+
+# Ensure the configuration is properly set for Azure environment
+RUN echo "Action Cable configuration updated for Azure Container Apps" > /app/AZURE_DEPLOYMENT_INFO
+
+# Keep the original entrypoint and startup commands
+WORKDIR /app
+
+# The container will use the same startup command as defined in Azure Container Apps:
+# bundle exec rails db:prepare && bundle exec rails server -b 0.0.0.0 -p 3000 

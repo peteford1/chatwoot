@@ -1,0 +1,28 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+scrape_configs:
+  # KrakenD Gateway metrics
+  - job_name: 'krakend-gateway'
+    static_configs:
+      - targets: ['krakend-gateway:8090']
+    scrape_interval: 5s
+    metrics_path: /metrics
+    
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Optional: Chatwoot backend monitoring (if metrics are exposed)
+  - job_name: 'chatwoot-backend'
+    static_configs:
+      - targets: ['chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io:443']
+    scheme: https
+    scrape_interval: 30s
+    scrape_timeout: 10s 

@@ -1,0 +1,297 @@
+{
+  "$schema": "https://www.krakend.io/schema/v3.json",
+  "version": 3,
+  "name": "VoiceLink AI Gateway",
+  "timeout": "30s",
+  "cache_ttl": "300s",
+  "host": [
+    "http://chatwoot-security-gateway.eastus.azurecontainer.io:8080"
+  ],
+  "endpoints": [
+    {
+      "endpoint": "/health",
+      "method": "GET",
+      "output_encoding": "json",
+      "headers_to_pass": [
+        "*"
+      ],
+      "extra_config": {
+        "security/policies": {
+          "max_conn": 1000,
+          "max_conn_per_ip": 100
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/__health",
+          "encoding": "json",
+          "method": "GET",
+          "host": [
+            "http://localhost:8080"
+          ],
+          "extra_config": {
+            "backend/http": {
+              "return_error_code": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/v1/widget/config",
+      "method": "POST", 
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "*"
+      ],
+      "extra_config": {
+        "security/policies": {
+          "max_conn": 100,
+          "max_conn_per_ip": 20
+        },
+        "qos/ratelimit/router": {
+          "max_rate": 100,
+          "client_max_rate": 10,
+          "strategy": "ip"
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/api/v1/widget/config",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ]
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/v1/widget/{conversation_id}/messages",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Authorization",
+        "X-Website-Token",
+        "User-Agent",
+        "Origin"
+      ],
+      "extra_config": {
+        "security/policies": {
+          "max_conn": 200,
+          "max_conn_per_ip": 50
+        },
+        "qos/ratelimit/router": {
+          "max_rate": 1000,
+          "client_max_rate": 100,
+          "strategy": "ip"
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/api/v1/widget/{conversation_id}/messages",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ]
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/v1/widget/conversations",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Content-Type",
+        "Authorization",
+        "X-Website-Token",
+        "User-Agent",
+        "Origin"
+      ],
+      "extra_config": {
+        "security/policies": {
+          "max_conn": 100,
+          "max_conn_per_ip": 30
+        },
+        "qos/ratelimit/router": {
+          "max_rate": 200,
+          "client_max_rate": 20,
+          "strategy": "ip"
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/api/v1/widget/conversations",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ]
+        }
+      ]
+    },
+    {
+      "endpoint": "/admin/api/v1/{path}",
+      "method": "GET",
+      "output_encoding": "json",
+      "headers_to_pass": [
+        "Authorization",
+        "X-User-ID",
+        "X-User-Role"
+      ],
+      "extra_config": {
+        "security/policies": {
+          "max_conn": 50,
+          "max_conn_per_ip": 10
+        },
+        "qos/ratelimit/router": {
+          "max_rate": 100,
+          "client_max_rate": 20,
+          "strategy": "header",
+          "key": "X-User-ID"
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/api/v1/{path}",
+          "encoding": "json",
+          "method": "GET",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ]
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/v1/{path}",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "*"
+      ],
+      "extra_config": {
+        "security/policies": {
+          "max_conn": 200,
+          "max_conn_per_ip": 50
+        },
+        "qos/ratelimit/router": {
+          "max_rate": 500,
+          "client_max_rate": 50,
+          "strategy": "ip"
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/api/v1/{path}",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ]
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/v1/{path}",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "*"
+      ],
+      "extra_config": {
+        "security/policies": {
+          "max_conn": 200,
+          "max_conn_per_ip": 50
+        },
+        "qos/ratelimit/router": {
+          "max_rate": 500,
+          "client_max_rate": 50,
+          "strategy": "ip"
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/api/v1/{path}",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ]
+        }
+      ]
+    },
+    {
+      "endpoint": "/app/{path}",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "*"
+      ],
+      "extra_config": {
+        "security/policies": {
+          "max_conn": 100,
+          "max_conn_per_ip": 20
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/app/{path}",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ]
+        }
+      ]
+    },
+    {
+      "endpoint": "/super_admin/{path}",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "*"
+      ],
+      "extra_config": {
+        "security/policies": {
+          "max_conn": 50,
+          "max_conn_per_ip": 10
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/super_admin/{path}",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ]
+        }
+      ]
+    },
+    {
+      "endpoint": "/super_admin/{path}",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "*"
+      ],
+      "extra_config": {
+        "security/policies": {
+          "max_conn": 50,
+          "max_conn_per_ip": 10
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/super_admin/{path}",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ]
+        }
+      ]
+    }
+  ]
+} 

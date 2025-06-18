@@ -1,0 +1,2 @@
+pg_dump: error: connection to server at "chatwoot-db-fresh.postgres.database.azure.com" (172.178.55.113), port 5432 failed: FATAL:  password authentication failed for user "chatwoot_prod"
+connection to server at "chatwoot-db-fresh.postgres.database.azure.com" (172.178.55.113), port 5432 failed: FATAL:  no pg_hba.conf entry for host "66.235.2.63", user "chatwoot_prod", database "chatwoot_production", no encryption

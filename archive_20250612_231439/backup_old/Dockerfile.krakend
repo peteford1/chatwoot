@@ -1,0 +1,25 @@
+FROM alpine:3.15 AS certs
+COPY voicelinkai.com.crt /etc/krakend/voicelinkai.com.crt
+COPY voicelinkai.com.key /etc/krakend/voicelinkai.com.key
+
+# Final image
+FROM devopsfaith/krakend:2.6.1
+COPY --from=certs /etc/krakend/ /etc/krakend/
+COPY krakend.json /etc/krakend/krakend.json
+COPY auth_transform.lua /etc/krakend/auth_transform.lua
+COPY admin_auth_transform.lua /etc/krakend/admin_auth_transform.lua
+COPY twilio_webhook_transform.lua /etc/krakend/twilio_webhook_transform.lua
+COPY general_webhook_transform.lua /etc/krakend/general_webhook_transform.lua
+
+WORKDIR /etc/krakend
+
+# Expose KrakenD port and metrics port
+EXPOSE 8080 8090
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:8080/__health || exit 1
+
+# Start KrakenD with configuration
+ENTRYPOINT ["krakend"]
+CMD ["run", "-c", "/etc/krakend/krakend.json"] 

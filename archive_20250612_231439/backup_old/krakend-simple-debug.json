@@ -1,0 +1,81 @@
+{
+  "version": 3,
+  "name": "KrakenD API Gateway - Simple Debug",
+  "timeout": "3000ms",
+  "cache_ttl": "300s",
+  "output_encoding": "no-op",
+  "debug_endpoint": true,
+  "echo_endpoint": true,
+  "extra_config": {
+    "telemetry/logging": {
+      "level": "DEBUG",
+      "prefix": "[KRAKEND]",
+      "syslog": false,
+      "stdout": true,
+      "format": "default"
+    }
+  },
+  "host": [
+    "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+  ],
+  "endpoints": [
+    {
+      "endpoint": "/auth/validate_token",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Content-Type",
+        "access-token",
+        "client",
+        "uid",
+        "token-type",
+        "expiry",
+        "User-Agent"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/auth/validate_token",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "backend/http": {
+              "return_error_code": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/v1/profile",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Content-Type",
+        "access-token",
+        "client",
+        "uid",
+        "token-type",
+        "expiry",
+        "User-Agent"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/api/v1/profile",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "backend/http": {
+              "return_error_code": true
+            }
+          }
+        }
+      ]
+    }
+  ]
+} 

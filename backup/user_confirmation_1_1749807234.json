@@ -1,0 +1,22 @@
+{
+  "confirmation_timestamp": "2025-06-13T02:33:54-0700",
+  "user_email": "admin@voicelinkai.com",
+  "user_id": 1,
+  "password": "Admin123!@#",
+  "confirmation_success": true,
+  "successful_method": "Direct Agent Confirmation",
+  "login_test_result": 401,
+  "original_user_data": {
+    "id": 1,
+    "account_id": 1,
+    "availability_status": "offline",
+    "auto_offline": true,
+    "confirmed": true,
+    "email": "admin@voicelinkai.com",
+    "available_name": "Super Admin",
+    "name": "Super Admin",
+    "role": "administrator",
+    "thumbnail": "",
+    "custom_role_id": null
+  }
+}

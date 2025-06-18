@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatwoot Agent Inbox</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #f9fafb;
+            color: #374151;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .inbox-container {
+            display: flex;
+            height: 100vh;
+            background: white;
+        }
+
+        /* Header Bar */
+        .header-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: #1f2937;
+            border-bottom: 1px solid #374151;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 1000;
+        }
+
+        .header-title {
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .agent-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: white;
+        }
+
+        .agent-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-top: 60px;
+            height: calc(100vh - 60px);
+            width: 100%;
+            display: flex;
+        }
+
+        /* Sidebar - Conversation List */
+        .sidebar {
+            width: 400px;
+            min-width: 400px;
+            border-right: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+
+        .sidebar-header {
+            padding: 16px;
+            border-bottom: 1px solid #e5e7eb;
+            background: white;
+        }
+
+        .sidebar-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 12px;
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 12px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 8px 12px 8px 36px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #f9fafb;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background: white;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6b7280;
+        }
+
+        .filters {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .filter-tab {
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .filter-tab.active {
+            background: #3b82f6;
+            color: white;
+        }
+
+        /* Conversation List */
+        .conversation-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0;
+        }
+
+        .conversation-item {
+            padding: 16px;
+            border-bottom: 1px solid #f3f4f6;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+            position: relative;
+        }
+
+        .conversation-item:hover {
+            background: #f8fafc;
+        }
+
+        .conversation-item.active {
+            background: #eff6ff;
+            border-right: 3px solid #3b82f6;
+        }
+
+        .conversation-item.unread {
+            background: #fefefe;
+            border-left: 3px solid #f59e0b;
+        }
+
+        .conversation-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .customer-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .conversation-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .customer-name {
+            font-weight: 600;
+            color: #111827;
+            font-size: 14px;
+            margin-bottom: 2px;
+        }
+
+        .last-message {
+            color: #6b7280;
+            font-size: 13px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .conversation-meta {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+        }
+
+        .timestamp {
+            color: #9ca3af;
+            font-size: 11px;
+        }
+
+        .status-badge {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .status-badge.open {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-badge.pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-badge.resolved {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        /* Chat Area */
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #f9fafb;
+        }
+
+        .chat-header {
+            padding: 16px 24px;
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chat-customer-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .chat-customer-name {
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .chat-customer-email {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .chat-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            background: white;
+            color: #374151;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            background: #f3f4f6;
+        }
+
+        .action-btn.primary {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        .action-btn.primary:hover {
+            background: #2563eb;
+        }
+
+        /* Messages */
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .message {
+            display: flex;
+            gap: 12px;
+            max-width: 80%;
+        }
+
+        .message.outgoing {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .message-avatar.customer {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .message-avatar.agent {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .message-content {
+            flex: 1;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .message-sender {
+            font-weight: 600;
+            font-size: 13px;
+            color: #111827;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: #9ca3af;
+        }
+
+        .message-bubble {
+            background: white;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            word-wrap: break-word;
+        }
+
+        .message.outgoing .message-bubble {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        /* Message Input */
+        .message-input-container {
+            padding: 16px 24px;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .message-input-box {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .message-input {
+            flex: 1;
+            min-height: 40px;
+            max-height: 120px;
+            padding: 10px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 20px;
+            resize: none;
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .message-input:focus {
+            border-color: #3b82f6;
+        }
+
+        .send-btn {
+            padding: 10px 20px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .send-btn:hover:not(:disabled) {
+            background: #2563eb;
+        }
+
+        .send-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        /* Empty State */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #6b7280;
+            text-align: center;
+        }
+
+        .empty-state-icon {
+            width: 64px;
+            height: 64px;
+            background: #f3f4f6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            font-size: 24px;
+        }
+
+        /* Loading States */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #6b7280;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #e5e7eb;
+            border-top: 2px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Debug Panel */
+        .debug-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #1f2937;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            font-size: 18px;
+            z-index: 1000;
+        }
+
+        .debug-panel {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 400px;
+            max-height: 300px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            display: none;
+            z-index: 1000;
+        }
+
+        .debug-header {
+            padding: 12px 16px;
+            background: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .debug-content {
+            padding: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                position: absolute;
+                left: 0;
+                z-index: 100;
+                transform: translateX(-100%);
+                transition: transform 0.3s;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .chat-area {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="inbox-container">
+        <!-- Header Bar -->
+        <div class="header-bar">
+            <div class="header-title">
+                🗨️ Chatwoot Agent Inbox
+            </div>
+            <div class="agent-info">
+                <div class="agent-avatar">AG</div>
+                <div>
+                    <div style="font-size: 14px; font-weight: 500;">Agent</div>
+                    <div style="font-size: 12px; opacity: 0.8; display: flex; align-items: center; gap: 6px;">
+                        <div class="status-indicator"></div>
+                        Online
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Sidebar - Conversation List -->
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <div class="sidebar-title">Conversations</div>
+                    <div class="search-box">
+                        <input type="text" class="search-input" id="searchInput" placeholder="Search conversations...">
+                        <div class="search-icon">🔍</div>
+                    </div>
+                    <div class="filters">
+                        <div class="filter-tab active" data-filter="all">All</div>
+                        <div class="filter-tab" data-filter="open">Open</div>
+                        <div class="filter-tab" data-filter="pending">Pending</div>
+                        <div class="filter-tab" data-filter="resolved">Resolved</div>
+                    </div>
+                </div>
+                
+                <div class="conversation-list" id="conversationList">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        Loading conversations...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Area -->
+            <div class="chat-area">
+                <div class="empty-state" id="emptyState">
+                    <div class="empty-state-icon">💬</div>
+                    <h3>Select a conversation</h3>
+                    <p>Choose a conversation from the sidebar to start chatting</p>
+                </div>
+
+                <!-- Chat Interface (hidden by default) -->
+                <div id="chatInterface" style="display: none; height: 100%; flex-direction: column;">
+                    <div class="chat-header">
+                        <div class="chat-customer-info">
+                            <div class="customer-avatar" id="chatCustomerAvatar">CU</div>
+                            <div>
+                                <div class="chat-customer-name" id="chatCustomerName">Customer Name</div>
+                                <div class="chat-customer-email" id="chatCustomerEmail">customer@example.com</div>
+                            </div>
+                        </div>
+                        <div class="chat-actions">
+                            <button class="action-btn" onclick="toggleConversationStatus()">Toggle Status</button>
+                            <button class="action-btn" onclick="assignConversation()">Assign</button>
+                            <button class="action-btn primary" onclick="resolveConversation()">Resolve</button>
+                        </div>
+                    </div>
+
+                    <div class="messages-container" id="messagesContainer">
+                        <!-- Messages will be populated here -->
+                    </div>
+
+                    <div class="message-input-container">
+                        <div class="message-input-box">
+                            <textarea class="message-input" id="messageInput" placeholder="Type your message..." rows="1"></textarea>
+                            <button class="send-btn" id="sendBtn" onclick="sendMessage()" disabled>Send</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Debug Panel -->
+    <button class="debug-toggle" onclick="toggleDebug()">🐛</button>
+    <div class="debug-panel" id="debugPanel">
+        <div class="debug-header">Debug Console</div>
+        <div class="debug-content" id="debugLog"></div>
+    </div>
+
+    <script>
+        // Configuration - Azure Chatwoot Instance
+        const CONFIG = {
+            API_BASE_URL: 'https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io',
+            GATEWAY_URL: 'https://voicelinkai-gateway.eastus.cloudapp.azure.com',
+            ACCESS_TOKEN: 'PDcyku9tpAYnNytixsfmoCHo',
+            ACCOUNT_ID: 1
+        };
+
+        // State Management
+        let conversations = [];
+        let activeConversation = null;
+        let currentFilter = 'all';
+        let debugLog = [];
+
+        // Debug functionality
+        function logDebug(message, data = null) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            debugLog.push(logEntry);
+            if (data) {
+                debugLog.push(JSON.stringify(data, null, 2));
+            }
+            console.log(logEntry, data);
+            updateDebugPanel();
+        }
+
+        function updateDebugPanel() {
+            const panel = document.getElementById('debugLog');
+            panel.innerHTML = debugLog.slice(-50).join('<br>');
+            panel.scrollTop = panel.scrollHeight;
+        }
+
+        function toggleDebug() {
+            const panel = document.getElementById('debugPanel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // API Functions with CORS-free methods (same as working customer center)
+        async function makeAPIRequest(endpoint, options = {}) {
+            // Try gateway first, then direct backend
+            const configs = [
+                { name: 'Gateway', baseUrl: CONFIG.GATEWAY_URL },
+                { name: 'Direct Backend', baseUrl: CONFIG.API_BASE_URL }
+            ];
+            
+            for (const config of configs) {
+                try {
+                    const url = `${config.baseUrl}${endpoint}`;
+                    logDebug(`Trying ${config.name}: ${options.method || 'GET'} ${url}`);
+                    
+                    // Use query parameters for GET to avoid CORS preflight
+                    if (!options.method || options.method === 'GET') {
+                        const separator = url.includes('?') ? '&' : '?';
+                        const urlWithToken = `${url}${separator}api_access_token=${CONFIG.ACCESS_TOKEN}`;
+                        
+                        const response = await fetch(urlWithToken, {
+                            method: 'GET'
+                        });
+                        
+                        if (response.ok) {
+                            const data = await response.json();
+                            logDebug(`✅ ${config.name} success: ${response.status}`, data);
+                            return data;
+                        } else {
+                            logDebug(`❌ ${config.name} failed: ${response.status}`);
+                            continue;
+                        }
+                    }
+                    
+                    // Use FormData for POST to avoid CORS preflight
+                    if (options.method === 'POST') {
+                        const formData = new FormData();
+                        formData.append('api_access_token', CONFIG.ACCESS_TOKEN);
+                        
+                        if (options.body) {
+                            if (typeof options.body === 'string') {
+                                const bodyData = JSON.parse(options.body);
+                                Object.keys(bodyData).forEach(key => {
+                                    formData.append(key, bodyData[key]);
+                                });
+                            } else {
+                                Object.keys(options.body).forEach(key => {
+                                    formData.append(key, options.body[key]);
+                                });
+                            }
+                        }
+                        
+                        const response = await fetch(url, {
+                            method: 'POST',
+                            body: formData
+                        });
+                        
+                        if (response.ok) {
+                            const data = await response.json();
+                            logDebug(`✅ ${config.name} success: ${response.status}`, data);
+                            return data;
+                        } else {
+                            logDebug(`❌ ${config.name} failed: ${response.status}`);
+                            continue;
+                        }
+                    }
+                    
+                } catch (error) {
+                    logDebug(`❌ ${config.name} error: ${error.message}`);
+                    continue;
+                }
+            }
+            
+            throw new Error('All API endpoints failed');
+        }
+
+        // Load conversations from API
+        async function loadConversations() {
+            try {
+                logDebug('🔄 Loading conversations...');
+                
+                const data = await makeAPIRequest(`/api/v1/accounts/${CONFIG.ACCOUNT_ID}/conversations`);
+                
+                // Handle different response formats
+                conversations = data.data?.payload || data.payload || data.data || data || [];
+                
+                if (Array.isArray(conversations)) {
+                    logDebug(`✅ Loaded ${conversations.length} conversations`);
+                    renderConversations();
+                } else {
+                    logDebug('⚠️ Unexpected data format', data);
+                    showMockConversations();
+                }
+                
+            } catch (error) {
+                logDebug(`❌ Error loading conversations: ${error.message}`);
+                showMockConversations();
+            }
+        }
+
+        // Show mock conversations for demo/testing
+        function showMockConversations() {
+            logDebug('📝 Showing mock conversations for demo');
+            
+            conversations = [
+                {
+                    id: 1,
+                    status: 'open',
+                    meta: {
+                        sender: {
+                            name: 'John Doe',
+                            email: 'john@example.com'
+                        }
+                    },
+                    messages: [
+                        {
+                            content: 'Hi, I need help with my account',
+                            created_at: new Date().toISOString(),
+                            message_type: 0
+                        }
+                    ]
+                },
+                {
+                    id: 2,
+                    status: 'pending',
+                    meta: {
+                        sender: {
+                            name: 'Jane Smith',
+                            email: 'jane@example.com'
+                        }
+                    },
+                    messages: [
+                        {
+                            content: 'When will my order arrive?',
+                            created_at: new Date(Date.now() - 3600000).toISOString(),
+                            message_type: 0
+                        }
+                    ]
+                },
+                {
+                    id: 3,
+                    status: 'resolved',
+                    meta: {
+                        sender: {
+                            name: 'Bob Wilson',
+                            email: 'bob@example.com'
+                        }
+                    },
+                    messages: [
+                        {
+                            content: 'Thank you for your help!',
+                            created_at: new Date(Date.now() - 7200000).toISOString(),
+                            message_type: 0
+                        }
+                    ]
+                }
+            ];
+            
+            renderConversations();
+        }
+
+        // Render conversations in sidebar
+        function renderConversations() {
+            const container = document.getElementById('conversationList');
+            
+            if (conversations.length === 0) {
+                container.innerHTML = '<div class="loading">No conversations found</div>';
+                return;
+            }
+            
+            const filteredConversations = filterConversations(conversations);
+            
+            container.innerHTML = filteredConversations.map(conv => {
+                const lastMessage = conv.messages && conv.messages.length > 0 
+                    ? conv.messages[conv.messages.length - 1] 
+                    : null;
+                
+                const customerName = conv.meta?.sender?.name || conv.contact?.name || `Customer ${conv.id}`;
+                const customerInitials = customerName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+                
+                const lastMessageText = lastMessage ? lastMessage.content : 'No messages yet';
+                const timestamp = lastMessage ? formatTimestamp(lastMessage.created_at) : '';
+                
+                return `
+                    <div class="conversation-item ${conv.status === 'open' ? 'unread' : ''}" 
+                         onclick="selectConversation(${conv.id})">
+                        <div style="display: flex; align-items: center;">
+                            <div class="customer-avatar">${customerInitials}</div>
+                            <div class="conversation-info">
+                                <div class="customer-name">${customerName}</div>
+                                <div class="last-message">${lastMessageText.substring(0, 60)}${lastMessageText.length > 60 ? '...' : ''}</div>
+                            </div>
+                            <div class="conversation-meta">
+                                <div class="timestamp">${timestamp}</div>
+                                <div class="status-badge ${conv.status}">${conv.status}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Select a conversation
+        function selectConversation(conversationId) {
+            const conversation = conversations.find(c => c.id === conversationId);
+            if (!conversation) return;
+            
+            activeConversation = conversation;
+            
+            // Update active state in sidebar
+            document.querySelectorAll('.conversation-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event?.target?.closest('.conversation-item')?.classList.add('active');
+            
+            logDebug(`📖 Selected conversation ${conversationId}`);
+            
+            // For now, just log the selection - full chat interface can be added later
+            alert(`Selected conversation with ${conversation.meta?.sender?.name || 'Customer'}\nStatus: ${conversation.status}\nLast message: ${conversation.messages?.[0]?.content || 'No messages'}`);
+        }
+
+        // Filter conversations
+        function filterConversations(conversations) {
+            if (currentFilter === 'all') return conversations;
+            return conversations.filter(conv => conv.status === currentFilter);
+        }
+
+        // Utility functions
+        function formatTimestamp(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diffInHours = (now - date) / (1000 * 60 * 60);
+            
+            if (diffInHours < 1) {
+                return 'Just now';
+            } else if (diffInHours < 24) {
+                return `${Math.floor(diffInHours)}h ago`;
+            } else {
+                return date.toLocaleDateString();
+            }
+        }
+
+        // Event listeners
+        function setupEventListeners() {
+            // Filter tabs
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    currentFilter = this.dataset.filter;
+                    renderConversations();
+                });
+            });
+
+            // Search input
+            document.getElementById('searchInput').addEventListener('input', function(e) {
+                // Simple search implementation
+                const searchTerm = e.target.value.toLowerCase();
+                const items = document.querySelectorAll('.conversation-item');
+                
+                items.forEach(item => {
+                    const customerName = item.querySelector('.customer-name').textContent.toLowerCase();
+                    const lastMessage = item.querySelector('.last-message').textContent.toLowerCase();
+                    
+                    if (customerName.includes(searchTerm) || lastMessage.includes(searchTerm)) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', async function() {
+            logDebug('🚀 Initializing Chatwoot Agent Inbox...');
+            
+            setupEventListeners();
+            await loadConversations();
+            
+            logDebug('✅ Inbox initialized successfully');
+        });
+    </script>
+</body>
+</html> 

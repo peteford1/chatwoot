@@ -38,6 +38,21 @@ module Chatwoot
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 7.0
 
+    # Configuration for API-only mode
+    # Commented out 2024-06-03: Separating frontend to standalone app
+    # config.api_only = true
+
+    # Enable CORS for frontend application
+    config.middleware.insert_before 0, Rack::Cors do
+      allow do
+        origins ENV.fetch('FRONTEND_URL', 'http://localhost:3001')
+        resource '*',
+          headers: :any,
+          methods: [:get, :post, :put, :patch, :delete, :options, :head],
+          credentials: true
+      end
+    end
+
     config.eager_load_paths << Rails.root.join('lib')
     config.eager_load_paths << Rails.root.join('enterprise/lib')
     config.eager_load_paths << Rails.root.join('enterprise/listeners')

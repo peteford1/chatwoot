@@ -1,0 +1,25 @@
+{
+  "containers": [
+    {
+      "image": "voicelinkcrm.azurecr.io/voicelinkai-gateway:v47-cors-origins",
+      "name": "voicelinkai-gateway-instance-v32",
+      "resources": {
+        "cpu": 0.5,
+        "ephemeralStorage": "2Gi",
+        "memory": "1Gi"
+      }
+    }
+  ],
+  "initContainers": null,
+  "revisionSuffix": "",
+  "scale": {
+    "cooldownPeriod": 300,
+    "maxReplicas": 10,
+    "minReplicas": null,
+    "pollingInterval": 30,
+    "rules": null
+  },
+  "serviceBinds": null,
+  "terminationGracePeriodSeconds": null,
+  "volumes": null
+}

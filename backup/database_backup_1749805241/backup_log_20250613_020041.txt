@@ -1,0 +1,26 @@
+[
+  {
+    "backupType": "Full",
+    "completedTime": "2025-06-11T23:38:30.110774+00:00",
+    "id": "/subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.DBforPostgreSQL/flexibleServers/chatwoot-db-fresh/backups/backup_638852819091107749",
+    "name": "backup_638852819091107749",
+    "resourceGroup": "SM-Test",
+    "source": "Automatic",
+    "type": "Microsoft.DBforPostgreSQL/flexibleServers/backups"
+  },
+  {
+    "backupType": "Full",
+    "completedTime": "2025-06-12T23:39:35.254326+00:00",
+    "id": "/subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.DBforPostgreSQL/flexibleServers/chatwoot-db-fresh/backups/backup_638853683742543263",
+    "name": "backup_638853683742543263",
+    "resourceGroup": "SM-Test",
+    "source": "Automatic",
+    "type": "Microsoft.DBforPostgreSQL/flexibleServers/backups"
+  }
+]
+ERROR: (CustomerOnDemandBackupCannotBePerformedOnBurstableServer) You cannot take customer on-demand backups on burstable servers.
+Code: CustomerOnDemandBackupCannotBePerformedOnBurstableServer
+Message: You cannot take customer on-demand backups on burstable servers.
+ERROR: (ResourceNotFound) The requested resource of type 'Microsoft.DBforPostgreSQL/flexibleServers/backups' with name 'manual-backup-20250613_020041' was not found.
+Code: ResourceNotFound
+Message: The requested resource of type 'Microsoft.DBforPostgreSQL/flexibleServers/backups' with name 'manual-backup-20250613_020041' was not found.

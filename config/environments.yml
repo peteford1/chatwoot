@@ -1,0 +1,72 @@
+# Environment Configuration for Chatwoot Deployments
+# Updated: 2025-06-16 - Fixed environment database mappings
+
+environments:
+  development:
+    database_name: "chatwoot_shared"
+    database_schema: "development"
+    container_app_name: "chatwoot-backend-dev"
+    frontend_url: "https://chatwoot-backend-dev.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+    rails_env: "development"
+    force_ssl: "false"
+    log_level: "debug"
+    sidekiq_concurrency: 2
+    
+  test:
+    database_name: "chatwoot_shared"
+    database_schema: "test"
+    container_app_name: "chatwoot-backend-test"
+    frontend_url: "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+    rails_env: "test"
+    force_ssl: "false"
+    log_level: "debug"
+    sidekiq_concurrency: 2
+    
+  staging:
+    database_name: "chatwoot_shared"
+    database_schema: "staging"
+    container_app_name: "chatwoot-backend-staging"
+    frontend_url: "https://chatwoot-staging.yourdomain.com"
+    rails_env: "staging"
+    force_ssl: "true"
+    log_level: "info"
+    sidekiq_concurrency: 5
+    
+  production:
+    database_name: "chatwoot_production"
+    database_schema: "public"
+    container_app_name: "chatwoot-backend-prod"
+    frontend_url: "https://chatwoot.yourdomain.com"
+    rails_env: "production"
+    force_ssl: "true"
+    log_level: "warn"
+    sidekiq_concurrency: 10
+
+# Azure Resources (shared across environments)
+azure:
+  resource_group: "SM-Test"
+  container_registry: "chatwootregistry95290.azurecr.io"
+  postgresql_server: "chatwoot-db-fresh"
+  managed_environment: "chatwoot-env-test"
+
+# Feature flags per environment
+features:
+  development:
+    enable_debug_toolbar: true
+    enable_test_webhooks: true
+    skip_ssl_verification: true
+    
+  test:
+    enable_debug_toolbar: true
+    enable_test_webhooks: true
+    skip_ssl_verification: true
+    
+  staging:
+    enable_debug_toolbar: false
+    enable_test_webhooks: true
+    skip_ssl_verification: false
+    
+  production:
+    enable_debug_toolbar: false
+    enable_test_webhooks: false
+    skip_ssl_verification: false 

@@ -1,0 +1,209 @@
+{
+  "operation_timestamp": "2025-06-13T02:22:43-0700",
+  "target_email": "admin@voicelinkai.com",
+  "new_password": "KvDDnnFh9sWKYNLw!1A",
+  "existing_users": [
+    {
+      "id": 3,
+      "account_id": 1,
+      "availability_status": "offline",
+      "auto_offline": true,
+      "confirmed": true,
+      "email": "storeadmin@voicelinkai.com",
+      "available_name": "Store Admin",
+      "name": "Store Admin",
+      "role": "administrator",
+      "thumbnail": "",
+      "custom_role_id": null
+    },
+    {
+      "id": 1,
+      "account_id": 1,
+      "availability_status": "offline",
+      "auto_offline": true,
+      "confirmed": true,
+      "email": "admin@voicelinkai.com",
+      "available_name": "Super Admin",
+      "name": "Super Admin",
+      "role": "administrator",
+      "thumbnail": "",
+      "custom_role_id": null
+    },
+    {
+      "id": 6,
+      "account_id": 1,
+      "availability_status": "offline",
+      "auto_offline": true,
+      "confirmed": true,
+      "email": "testuser_3b04aaa6@voicelinkai.com",
+      "available_name": "Test User 40eb",
+      "name": "Test User 40eb",
+      "role": "agent",
+      "thumbnail": "",
+      "custom_role_id": null
+    },
+    {
+      "id": 8,
+      "account_id": 1,
+      "availability_status": "offline",
+      "auto_offline": true,
+      "confirmed": true,
+      "email": "testuser_5076d620@voicelinkai.com",
+      "available_name": "Test User 5076d620",
+      "name": "Test User 5076d620",
+      "role": "administrator",
+      "thumbnail": "",
+      "custom_role_id": null
+    },
+    {
+      "id": 10,
+      "account_id": 1,
+      "availability_status": "offline",
+      "auto_offline": true,
+      "confirmed": true,
+      "email": "testuser_69f7a64f@voicelinkai.com",
+      "available_name": "Test User 69f7a64f",
+      "name": "Test User 69f7a64f",
+      "role": "administrator",
+      "thumbnail": "",
+      "custom_role_id": null
+    },
+    {
+      "id": 9,
+      "account_id": 1,
+      "availability_status": "offline",
+      "auto_offline": true,
+      "confirmed": true,
+      "email": "testuser_6e0a541c@voicelinkai.com",
+      "available_name": "Test User 6e0a541c",
+      "name": "Test User 6e0a541c",
+      "role": "administrator",
+      "thumbnail": "",
+      "custom_role_id": null
+    },
+    {
+      "id": 7,
+      "account_id": 1,
+      "availability_status": "offline",
+      "auto_offline": true,
+      "confirmed": true,
+      "email": "testuser_716a7003@voicelinkai.com",
+      "available_name": "Test User 716a7003",
+      "name": "Test User 716a7003",
+      "role": "agent",
+      "thumbnail": "",
+      "custom_role_id": null
+    },
+    {
+      "id": 5,
+      "account_id": 1,
+      "availability_status": "offline",
+      "auto_offline": true,
+      "confirmed": true,
+      "email": "testuser_729415b8@voicelinkai.com",
+      "available_name": "Test User e8cf",
+      "name": "Test User e8cf",
+      "role": "agent",
+      "thumbnail": "",
+      "custom_role_id": null
+    },
+    {
+      "id": 4,
+      "account_id": 1,
+      "availability_status": "offline",
+      "auto_offline": true,
+      "confirmed": true,
+      "email": "testuser_b3ca92df@voicelinkai.com",
+      "available_name": "Test User f3ac",
+      "name": "Test User f3ac",
+      "role": "agent",
+      "thumbnail": "",
+      "custom_role_id": null
+    },
+    {
+      "access_token": "baea8676c67aba47c08564ce",
+      "account_id": 1,
+      "available_name": "Super Admin",
+      "avatar_url": "",
+      "confirmed": true,
+      "display_name": null,
+      "message_signature": null,
+      "email": "admin@voicelinkai.com",
+      "id": 1,
+      "inviter_id": null,
+      "name": "Super Admin",
+      "provider": "email",
+      "pubsub_token": "6wnRRUNFsBPnDVHYpuCBSRBS",
+      "role": "administrator",
+      "ui_settings": {
+      },
+      "uid": "admin@voicelinkai.com",
+      "type": "SuperAdmin",
+      "accounts": [
+        {
+          "id": 1,
+          "name": "voicelinkai.com",
+          "status": "active",
+          "active_at": null,
+          "role": "administrator",
+          "permissions": [
+            "administrator"
+          ],
+          "availability": "online",
+          "availability_status": "offline",
+          "auto_offline": true,
+          "custom_role_id": null,
+          "custom_role": null
+        }
+      ]
+    }
+  ],
+  "user_found": true,
+  "target_user": {
+    "access_token": "baea8676c67aba47c08564ce",
+    "account_id": 1,
+    "available_name": "Super Admin",
+    "avatar_url": "",
+    "confirmed": true,
+    "display_name": null,
+    "message_signature": null,
+    "email": "admin@voicelinkai.com",
+    "id": 1,
+    "inviter_id": null,
+    "name": "Super Admin",
+    "provider": "email",
+    "pubsub_token": "6wnRRUNFsBPnDVHYpuCBSRBS",
+    "role": "administrator",
+    "ui_settings": {
+    },
+    "uid": "admin@voicelinkai.com",
+    "type": "SuperAdmin",
+    "accounts": [
+      {
+        "id": 1,
+        "name": "voicelinkai.com",
+        "status": "active",
+        "active_at": null,
+        "role": "administrator",
+        "permissions": [
+          "administrator"
+        ],
+        "availability": "online",
+        "availability_status": "offline",
+        "auto_offline": true,
+        "custom_role_id": null,
+        "custom_role": null
+      }
+    ]
+  },
+  "reset_status": "success",
+  "reset_method": {
+    "method": "PATCH",
+    "url": "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io/api/v1/accounts/1/agents/1",
+    "body": {
+      "password": "KvDDnnFh9sWKYNLw!1A",
+      "password_confirmation": "KvDDnnFh9sWKYNLw!1A"
+    }
+  },
+  "reset_response": "{\"id\":1,\"account_id\":1,\"availability_status\":\"offline\",\"auto_offline\":true,\"confirmed\":true,\"email\":\"admin@voicelinkai.com\",\"available_name\":\"Super Admin\",\"name\":\"Super Admin\",\"role\":\"administrator\",\"thumbnail\":\"\",\"custom_role_id\":null}"
+}

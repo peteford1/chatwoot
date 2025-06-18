@@ -1,0 +1,254 @@
+{
+  "deletion_timestamp": "2025-06-13T02:15:07-0700",
+  "account_id": 1,
+  "conversation_id": 1,
+  "inbox_id": 2,
+  "reason": "Deleting conversation and duplicate inbox to resolve phone number conflict",
+  "phone_number_conflict": "Inbox 2 (19795412927) vs Inbox 6 (+19795412927)",
+  "conversation_data": {
+    "meta": {
+      "sender": {
+        "additional_attributes": {
+        },
+        "availability_status": "offline",
+        "email": null,
+        "id": 1,
+        "name": "Test User",
+        "phone_number": "+14353397687",
+        "blocked": false,
+        "identifier": null,
+        "thumbnail": "",
+        "custom_attributes": {
+        },
+        "created_at": 1749767598
+      },
+      "channel": "Channel::Sms",
+      "hmac_verified": false
+    },
+    "id": 1,
+    "messages": [
+      {
+        "id": 11,
+        "content": "suck",
+        "account_id": 1,
+        "inbox_id": 2,
+        "conversation_id": 1,
+        "message_type": 1,
+        "created_at": 1749797853,
+        "updated_at": "2025-06-13T06:57:33.155Z",
+        "private": false,
+        "status": "sent",
+        "source_id": null,
+        "content_type": "text",
+        "content_attributes": {
+        },
+        "sender_type": "User",
+        "sender_id": 1,
+        "external_source_ids": {
+        },
+        "additional_attributes": {
+        },
+        "processed_message_content": "suck",
+        "sentiment": {
+        },
+        "conversation": {
+          "assignee_id": null,
+          "unread_count": 1,
+          "last_activity_at": 1749797853,
+          "contact_inbox": {
+            "source_id": "+14353397687"
+          }
+        },
+        "sender": {
+          "id": 1,
+          "name": "Super Admin",
+          "available_name": "Super Admin",
+          "avatar_url": "",
+          "type": "user",
+          "availability_status": "offline",
+          "thumbnail": ""
+        }
+      }
+    ],
+    "account_id": 1,
+    "uuid": "80553b29-83fc-40c0-bfff-28d4ac8b0d4c",
+    "additional_attributes": {
+    },
+    "agent_last_seen_at": 0,
+    "assignee_last_seen_at": 0,
+    "can_reply": true,
+    "contact_last_seen_at": 0,
+    "custom_attributes": {
+    },
+    "inbox_id": 2,
+    "labels": [
+
+    ],
+    "muted": false,
+    "snoozed_until": null,
+    "status": "open",
+    "created_at": 1749767613,
+    "updated_at": 1749797853.160925,
+    "timestamp": 1749797853,
+    "first_reply_created_at": 1749767637,
+    "unread_count": 1,
+    "last_non_activity_message": {
+      "id": 11,
+      "content": "suck",
+      "account_id": 1,
+      "inbox_id": 2,
+      "conversation_id": 1,
+      "message_type": 1,
+      "created_at": 1749797853,
+      "updated_at": "2025-06-13T06:57:33.155Z",
+      "private": false,
+      "status": "sent",
+      "source_id": null,
+      "content_type": "text",
+      "content_attributes": {
+      },
+      "sender_type": "User",
+      "sender_id": 1,
+      "external_source_ids": {
+      },
+      "additional_attributes": {
+      },
+      "processed_message_content": "suck",
+      "sentiment": {
+      },
+      "conversation": {
+        "assignee_id": null,
+        "unread_count": 1,
+        "last_activity_at": 1749797853,
+        "contact_inbox": {
+          "source_id": "+14353397687"
+        }
+      },
+      "sender": {
+        "id": 1,
+        "name": "Super Admin",
+        "available_name": "Super Admin",
+        "avatar_url": "",
+        "type": "user",
+        "availability_status": "offline",
+        "thumbnail": ""
+      }
+    },
+    "last_activity_at": 1749797853,
+    "priority": null,
+    "waiting_since": 0,
+    "sla_policy_id": null
+  },
+  "inbox_data": {
+    "id": 2,
+    "avatar_url": "",
+    "channel_id": 2,
+    "name": "VoiceLinkAI - SMS (+19795412927)",
+    "channel_type": "Channel::Sms",
+    "greeting_enabled": false,
+    "greeting_message": null,
+    "working_hours_enabled": false,
+    "enable_email_collect": true,
+    "csat_survey_enabled": false,
+    "csat_config": {
+    },
+    "enable_auto_assignment": true,
+    "auto_assignment_config": {
+    },
+    "out_of_office_message": null,
+    "working_hours": [
+      {
+        "day_of_week": 0,
+        "closed_all_day": true,
+        "open_hour": null,
+        "open_minutes": null,
+        "close_hour": null,
+        "close_minutes": null,
+        "open_all_day": false
+      },
+      {
+        "day_of_week": 1,
+        "closed_all_day": false,
+        "open_hour": 9,
+        "open_minutes": 0,
+        "close_hour": 17,
+        "close_minutes": 0,
+        "open_all_day": false
+      },
+      {
+        "day_of_week": 2,
+        "closed_all_day": false,
+        "open_hour": 9,
+        "open_minutes": 0,
+        "close_hour": 17,
+        "close_minutes": 0,
+        "open_all_day": false
+      },
+      {
+        "day_of_week": 3,
+        "closed_all_day": false,
+        "open_hour": 9,
+        "open_minutes": 0,
+        "close_hour": 17,
+        "close_minutes": 0,
+        "open_all_day": false
+      },
+      {
+        "day_of_week": 4,
+        "closed_all_day": false,
+        "open_hour": 9,
+        "open_minutes": 0,
+        "close_hour": 17,
+        "close_minutes": 0,
+        "open_all_day": false
+      },
+      {
+        "day_of_week": 5,
+        "closed_all_day": false,
+        "open_hour": 9,
+        "open_minutes": 0,
+        "close_hour": 17,
+        "close_minutes": 0,
+        "open_all_day": false
+      },
+      {
+        "day_of_week": 6,
+        "closed_all_day": true,
+        "open_hour": null,
+        "open_minutes": null,
+        "close_hour": null,
+        "close_minutes": null,
+        "open_all_day": false
+      }
+    ],
+    "timezone": "UTC",
+    "callback_webhook_url": "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io/webhooks/sms/19795412927",
+    "allow_messages_after_resolved": true,
+    "lock_to_single_conversation": false,
+    "sender_name_type": "friendly",
+    "business_name": null,
+    "widget_color": null,
+    "website_url": null,
+    "hmac_mandatory": null,
+    "welcome_title": null,
+    "welcome_tagline": null,
+    "web_widget_script": null,
+    "website_token": null,
+    "selected_feature_flags": null,
+    "reply_time": null,
+    "messaging_service_sid": null,
+    "phone_number": "19795412927",
+    "provider": "default"
+  },
+  "conversation_deletion": {
+    "status": "failed",
+    "response_code": 404,
+    "error": "{\"status\":404,\"error\":\"Not Found\"}"
+  },
+  "conversation_verification": "still_exists",
+  "inbox_empty": false,
+  "inbox_deletion": {
+    "status": "skipped",
+    "reason": "inbox_not_empty"
+  }
+}

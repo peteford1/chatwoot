@@ -16,6 +16,18 @@ on:
         description: 'Container app name'
         required: true
         default: 'chatwoot-automated'
+      account_name:
+        description: 'Initial account name'
+        required: false
+        default: 'VoiceLink AI'
+      admin_email:
+        description: 'Admin user email'
+        required: false
+        default: 'admin@voicelinkai.com'
+      admin_name:
+        description: 'Admin user display name'
+        required: false
+        default: 'Admin User'
 
 env:
   AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
@@ -93,6 +105,61 @@ jobs:
           echo "Error: Database preparation failed. Expected at least 50 tables, got $FINAL_COUNT"
           exit 1
         fi
+
+    - name: Check if seeding is needed
+      id: check_seeding
+      run: |
+        ACCOUNT_COUNT=$(PGPASSWORD="${{ secrets.DB_PASSWORD }}" psql \
+          -h ${{ secrets.DB_HOST }} \
+          -U ${{ secrets.DB_USERNAME }} \
+          -d chatwoot_shared \
+          -t -c "SELECT COUNT(*) FROM accounts;" 2>/dev/null || echo "0")
+        USER_COUNT=$(PGPASSWORD="${{ secrets.DB_PASSWORD }}" psql \
+          -h ${{ secrets.DB_HOST }} \
+          -U ${{ secrets.DB_USERNAME }} \
+          -d chatwoot_shared \
+          -t -c "SELECT COUNT(*) FROM users;" 2>/dev/null || echo "0")
+        
+        echo "account_count=$ACCOUNT_COUNT" >> $GITHUB_OUTPUT
+        echo "user_count=$USER_COUNT" >> $GITHUB_OUTPUT
+        echo "Found $ACCOUNT_COUNT accounts and $USER_COUNT users"
+
+    - name: Run Database Seeder
+      if: steps.check_seeding.outputs.account_count < 1 || steps.check_seeding.outputs.user_count < 1
+      env:
+        RAILS_ENV: production
+        SECRET_KEY_BASE: ${{ secrets.SECRET_KEY_BASE }}
+        POSTGRES_HOST: ${{ secrets.DB_HOST }}
+        POSTGRES_USERNAME: ${{ secrets.DB_USERNAME }}
+        POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        POSTGRES_DATABASE: chatwoot_shared
+        POSTGRES_PORT: 5432
+        # Seeder configuration
+        SEED_ACCOUNT_NAME: ${{ github.event.inputs.account_name || 'VoiceLink AI' }}
+        SEED_USER_EMAIL: ${{ github.event.inputs.admin_email || 'admin@voicelinkai.com' }}
+        SEED_USER_PASSWORD: ${{ secrets.ADMIN_PASSWORD || 'Password1!' }}
+        SEED_USER_NAME: ${{ github.event.inputs.admin_name || 'Admin User' }}
+        FRONTEND_URL: "https://${{ github.event.inputs.container_name }}.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+      run: |
+        echo "Running production seeder to create initial account and user..."
+        bundle exec ruby scripts/production_seeder.rb
+
+    - name: Verify Seeding Results
+      run: |
+        FINAL_ACCOUNT_COUNT=$(PGPASSWORD="${{ secrets.DB_PASSWORD }}" psql \
+          -h ${{ secrets.DB_HOST }} \
+          -U ${{ secrets.DB_USERNAME }} \
+          -d chatwoot_shared \
+          -t -c "SELECT COUNT(*) FROM accounts;")
+        FINAL_USER_COUNT=$(PGPASSWORD="${{ secrets.DB_PASSWORD }}" psql \
+          -h ${{ secrets.DB_HOST }} \
+          -U ${{ secrets.DB_USERNAME }} \
+          -d chatwoot_shared \
+          -t -c "SELECT COUNT(*) FROM users;")
+        
+        echo "Seeding complete. Final counts:"
+        echo "- Accounts: $FINAL_ACCOUNT_COUNT"
+        echo "- Users: $FINAL_USER_COUNT"
 
   deploy-container:
     runs-on: ubuntu-latest
@@ -251,7 +318,16 @@ jobs:
         echo "🌐 URL: https://$CONTAINER_URL"
         echo "🎯 Environment: ${{ github.event.inputs.environment }}"
         echo ""
+        echo "🔐 Login Credentials:"
+        echo "   Email: ${{ github.event.inputs.admin_email || 'admin@voicelinkai.com' }}"
+        echo "   Password: ${{ secrets.ADMIN_PASSWORD || 'Password1!' }}"
+        echo ""
+        echo "📋 Account Details:"
+        echo "   Account Name: ${{ github.event.inputs.account_name || 'VoiceLink AI' }}"
+        echo "   Admin User: ${{ github.event.inputs.admin_name || 'Admin User' }}"
+        echo ""
         echo "Next steps:"
-        echo "1. Test the application at the URL above"
-        echo "2. Set up initial admin user if needed"
-        echo "3. Configure additional settings through the UI" 
+        echo "1. Access the application at: https://$CONTAINER_URL"
+        echo "2. Login with the credentials above"
+        echo "3. Configure additional settings through the UI"
+        echo "4. Set up additional users and inboxes as needed" 

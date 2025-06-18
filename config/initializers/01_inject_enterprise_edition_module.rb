@@ -77,9 +77,13 @@ module InjectEnterpriseEditionModule
 
       yield(extension_module) if extension_module
     end
+  rescue => e
+    # 2025-06-11: Temporary fix for enterprise module loading issue during database reset
+    Rails.logger.debug "Enterprise module loading error: #{e.message}" if defined?(Rails)
   end
 
   def const_get_maybe_false(mod, name)
+    return false if mod.nil? || mod == false
     mod&.const_defined?(name, false) && mod&.const_get(name, false)
   end
 end

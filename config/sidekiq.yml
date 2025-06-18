@@ -12,21 +12,21 @@
 # even put in dynamic logic, like a host-specific queue.
 # http://www.mikeperham.com/2013/11/13/advanced-sidekiq-host-specific-queues/
 # https://github.com/sidekiq/sidekiq/wiki/Advanced-Options
-# Since queues are declared without waits, the jobs in lower ranking queues will only be processed
-# if there are no jobs in higher ranking queues.
+# Using weighted queues ensures all queues are processed, with higher weights processed more frequently
+# This prevents low priority jobs from being starved when higher priority queues have jobs
 :queues:
-  - critical
-  - high
-  - medium
-  - default
-  - mailers
-  - action_mailbox_routing
-  - low
-  - scheduled_jobs
-  - async_database_migration
-  - active_storage_analysis
-  - active_storage_purge
-  - action_mailbox_incineration
+  - [critical, 10]
+  - [high, 8]
+  - [medium, 6]
+  - [default, 4]
+  - [mailers, 3]
+  - [action_mailbox_routing, 2]
+  - [low, 1]
+  - [scheduled_jobs, 2]
+  - [async_database_migration, 1]
+  - [active_storage_analysis, 1]
+  - [active_storage_purge, 1]
+  - [action_mailbox_incineration, 1]
 
 # you can override concurrency based on environment
 production:

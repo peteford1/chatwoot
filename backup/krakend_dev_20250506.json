@@ -1,0 +1,263 @@
+{
+  "backendAddressPools": [
+    {
+      "backendAddresses": [
+        {
+          "ipAddress": "10.0.2.5"
+        }
+      ],
+      "etag": "W/\"2f47aa5b-2489-4d28-8cb0-d496a103f754\"",
+      "id": "/subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.Network/applicationGateways/voicelinkai-gateway-appgw/backendAddressPools/appGatewayBackendPool",
+      "name": "appGatewayBackendPool",
+      "provisioningState": "Succeeded",
+      "resourceGroup": "SM-Test",
+      "type": "Microsoft.Network/applicationGateways/backendAddressPools"
+    }
+  ],
+  "backendHttpSettingsCollection": [
+    {
+      "connectionDraining": {
+        "drainTimeoutInSec": 1,
+        "enabled": false
+      },
+      "cookieBasedAffinity": "Disabled",
+      "etag": "W/\"2f47aa5b-2489-4d28-8cb0-d496a103f754\"",
+      "id": "/subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.Network/applicationGateways/voicelinkai-gateway-appgw/backendHttpSettingsCollection/appGatewayBackendHttpSettings",
+      "name": "appGatewayBackendHttpSettings",
+      "pickHostNameFromBackendAddress": false,
+      "port": 8080,
+      "probe": {
+        "id": "/subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.Network/applicationGateways/voicelinkai-gateway-appgw/probes/health-probe",
+        "resourceGroup": "SM-Test"
+      },
+      "protocol": "Http",
+      "provisioningState": "Succeeded",
+      "requestTimeout": 30,
+      "resourceGroup": "SM-Test",
+      "type": "Microsoft.Network/applicationGateways/backendHttpSettingsCollection"
+    }
+  ],
+  "backendSettingsCollection": [],
+  "defaultPredefinedSslPolicy": "AppGwSslPolicy20150501",
+  "etag": "W/\"2f47aa5b-2489-4d28-8cb0-d496a103f754\"",
+  "frontendIPConfigurations": [
+    {
+      "etag": "W/\"2f47aa5b-2489-4d28-8cb0-d496a103f754\"",
+      "id": "/subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.Network/applicationGateways/voicelinkai-gateway-appgw/frontendIPConfigurations/appGatewayFrontendIP",
+      "name": "appGatewayFrontendIP",
+      "privateIPAllocationMethod": "Dynamic",
+      "provisioningState": "Succeeded",
+      "publicIPAddress": {
+        "id": "/subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.Network/publicIPAddresses/voicelinkai-gateway-ip",
+        "resourceGroup": "SM-Test"
+      },
+      "resourceGroup": "SM-Test",
+      "type": "Microsoft.Network/applicationGateways/frontendIPConfigurations"
+    }
+  ],
+  "frontendPorts": [
+    {
+      "etag": "W/\"2f47aa5b-2489-4d28-8cb0-d496a103f754\"",
+      "id": "/subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.Network/applicationGateways/voicelinkai-gateway-appgw/frontendPorts/appGatewayFrontendPort",
+      "name": "appGatewayFrontendPort",
+      "port": 80,
+      "provisioningState": "Succeeded",
+      "resourceGroup": "SM-Test",
+      "type": "Microsoft.Network/applicationGateways/frontendPorts"
+    },
+    {
+      "etag": "W/\"2f47aa5b-2489-4d28-8cb0-d496a103f754\"",
+      "id": "/subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.Network/applicationGateways/voicelinkai-gateway-appgw/frontendPorts/frontend-port-443",
+      "name": "frontend-port-443",
+      "port": 443,
+      "provisioningState": "Succeeded",
+      "resourceGroup": "SM-Test",
+      "type": "Microsoft.Network/applicationGateways/frontendPorts"
+    }
+  ],
+  "gatewayIPConfigurations": [
+    {
+      "etag": "W/\"2f47aa5b-2489-4d28-8cb0-d496a103f754\"",
+      "id": "/subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.Network/applicationGateways/voicelinkai-gateway-appgw/gatewayIPConfigurations/appGatewayFrontendIP",
+      "name": "appGatewayFrontendIP",
+      "provisioningState": "Succeeded",
+      "resourceGroup": "SM-Test",
+      "subnet": {
+        "id": "/subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.Network/virtualNetworks/voicelinkai-vnet/subnets/gateway-subnet",
+        "resourceGroup": "SM-Test"
+      },
+      "type": "Microsoft.Network/applicationGateways/gatewayIPConfigurations"
+    }
+  ],
+  "httpListeners": [
+    {
+      "etag": "W/\"2f47aa5b-2489-4d28-8cb0-d496a103f754\"",
+      "frontendIPConfiguration": {
+        "id": "/subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.Network/applicationGateways/voicelinkai-gateway-appgw/frontendIPConfigurations/appGatewayFrontendIP",
+        "resourceGroup": "SM-Test"
+      },
+      "frontendPort": {
+        "id": "/subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.Network/applicationGateways/voicelinkai-gateway-appgw/frontendPorts/appGatewayFrontendPort",
+        "resourceGroup": "SM-Test"
+      },
+      "hostNames": [],
+      "id": "/subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.Network/applicationGateways/voicelinkai-gateway-appgw/httpListeners/appGatewayHttpListener",
+      "name": "appGatewayHttpListener",
+      "protocol": "Http",
+      "provisioningState": "Succeeded",
+      "requireServerNameIndication": false,
+      "resourceGroup": "SM-Test",
+      "type": "Microsoft.Network/applicationGateways/httpListeners"
+    },
+    {
+      "etag": "W/\"2f47aa5b-2489-4d28-8cb0-d496a103f754\"",
+      "frontendIPConfiguration": {
+        "id": "/subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.Network/applicationGateways/voicelinkai-gateway-appgw/frontendIPConfigurations/appGatewayFrontendIP",
+        "resourceGroup": "SM-Test"
+      },
+      "frontendPort": {
+        "id": "/subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.Network/applicationGateways/voicelinkai-gateway-appgw/frontendPorts/frontend-port-443",
+        "resourceGroup": "SM-Test"
+      },
+      "hostNames": [],
+      "id": "/subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.Network/applicationGateways/voicelinkai-gateway-appgw/httpListeners/https-listener",
+      "name": "https-listener",
+      "protocol": "Https",
+      "provisioningState": "Succeeded",
+      "requireServerNameIndication": false,
+      "resourceGroup": "SM-Test",
+      "sslCertificate": {
+        "id": "/subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.Network/applicationGateways/voicelinkai-gateway-appgw/sslCertificates/ssl-certificate",
+        "resourceGroup": "SM-Test"
+      },
+      "type": "Microsoft.Network/applicationGateways/httpListeners"
+    }
+  ],
+  "id": "/subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.Network/applicationGateways/voicelinkai-gateway-appgw",
+  "listeners": [],
+  "loadDistributionPolicies": [],
+  "location": "eastus",
+  "name": "voicelinkai-gateway-appgw",
+  "operationalState": "Running",
+  "privateEndpointConnections": [],
+  "privateLinkConfigurations": [],
+  "probes": [
+    {
+      "etag": "W/\"2f47aa5b-2489-4d28-8cb0-d496a103f754\"",
+      "host": "10.0.2.4",
+      "id": "/subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.Network/applicationGateways/voicelinkai-gateway-appgw/probes/widget-health-probe",
+      "interval": 30,
+      "match": {
+        "statusCodes": [
+          "200-399"
+        ]
+      },
+      "minServers": 0,
+      "name": "widget-health-probe",
+      "path": "/api/v1/widget/config",
+      "pickHostNameFromBackendHttpSettings": false,
+      "protocol": "Http",
+      "provisioningState": "Succeeded",
+      "resourceGroup": "SM-Test",
+      "timeout": 30,
+      "type": "Microsoft.Network/applicationGateways/probes",
+      "unhealthyThreshold": 3
+    },
+    {
+      "etag": "W/\"2f47aa5b-2489-4d28-8cb0-d496a103f754\"",
+      "host": "10.0.2.4",
+      "id": "/subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.Network/applicationGateways/voicelinkai-gateway-appgw/probes/health-probe",
+      "interval": 30,
+      "match": {
+        "statusCodes": [
+          "200-399"
+        ]
+      },
+      "minServers": 0,
+      "name": "health-probe",
+      "path": "/health",
+      "pickHostNameFromBackendHttpSettings": false,
+      "protocol": "Http",
+      "provisioningState": "Succeeded",
+      "resourceGroup": "SM-Test",
+      "timeout": 30,
+      "type": "Microsoft.Network/applicationGateways/probes",
+      "unhealthyThreshold": 3
+    }
+  ],
+  "provisioningState": "Succeeded",
+  "redirectConfigurations": [],
+  "requestRoutingRules": [
+    {
+      "backendAddressPool": {
+        "id": "/subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.Network/applicationGateways/voicelinkai-gateway-appgw/backendAddressPools/appGatewayBackendPool",
+        "resourceGroup": "SM-Test"
+      },
+      "backendHttpSettings": {
+        "id": "/subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.Network/applicationGateways/voicelinkai-gateway-appgw/backendHttpSettingsCollection/appGatewayBackendHttpSettings",
+        "resourceGroup": "SM-Test"
+      },
+      "etag": "W/\"2f47aa5b-2489-4d28-8cb0-d496a103f754\"",
+      "httpListener": {
+        "id": "/subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.Network/applicationGateways/voicelinkai-gateway-appgw/httpListeners/appGatewayHttpListener",
+        "resourceGroup": "SM-Test"
+      },
+      "id": "/subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.Network/applicationGateways/voicelinkai-gateway-appgw/requestRoutingRules/rule1",
+      "name": "rule1",
+      "priority": 100,
+      "provisioningState": "Succeeded",
+      "resourceGroup": "SM-Test",
+      "ruleType": "Basic",
+      "type": "Microsoft.Network/applicationGateways/requestRoutingRules"
+    },
+    {
+      "backendAddressPool": {
+        "id": "/subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.Network/applicationGateways/voicelinkai-gateway-appgw/backendAddressPools/appGatewayBackendPool",
+        "resourceGroup": "SM-Test"
+      },
+      "backendHttpSettings": {
+        "id": "/subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.Network/applicationGateways/voicelinkai-gateway-appgw/backendHttpSettingsCollection/appGatewayBackendHttpSettings",
+        "resourceGroup": "SM-Test"
+      },
+      "etag": "W/\"2f47aa5b-2489-4d28-8cb0-d496a103f754\"",
+      "httpListener": {
+        "id": "/subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.Network/applicationGateways/voicelinkai-gateway-appgw/httpListeners/https-listener",
+        "resourceGroup": "SM-Test"
+      },
+      "id": "/subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.Network/applicationGateways/voicelinkai-gateway-appgw/requestRoutingRules/https-routing-rule",
+      "name": "https-routing-rule",
+      "priority": 200,
+      "provisioningState": "Succeeded",
+      "resourceGroup": "SM-Test",
+      "ruleType": "Basic",
+      "type": "Microsoft.Network/applicationGateways/requestRoutingRules"
+    }
+  ],
+  "resourceGroup": "SM-Test",
+  "resourceGuid": "dd7add53-8480-4974-a7fe-026b77d99f0d",
+  "rewriteRuleSets": [],
+  "routingRules": [],
+  "sku": {
+    "capacity": 1,
+    "family": "Generation_1",
+    "name": "Standard_v2",
+    "tier": "Standard_v2"
+  },
+  "sslCertificates": [
+    {
+      "etag": "W/\"2f47aa5b-2489-4d28-8cb0-d496a103f754\"",
+      "id": "/subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.Network/applicationGateways/voicelinkai-gateway-appgw/sslCertificates/ssl-certificate",
+      "name": "ssl-certificate",
+      "provisioningState": "Succeeded",
+      "publicCertData": "MIIEBgYJKoZIhvcNAQcCoIID9zCCA/MCAQExADALBgkqhkiG9w0BBwGgggPbMIID1zCCAr+gAwIBAgIUIBQilB17IVyn6XMDQKMToNxacL4wDQYJKoZIhvcNAQELBQAwezELMAkGA1UEBhMCVVMxCzAJBgNVBAgMAldBMRAwDgYDVQQHDAdTZWF0dGxlMRUwEwYDVQQKDAxWb2ljZUxpbmsgQUkxNjA0BgNVBAMMLXZvaWNlbGlua2FpLWdhdGV3YXkuZWFzdHVzLmNsb3VkYXBwLmF6dXJlLmNvbTAeFw0yNTA2MDQyMzUzNTZaFw0yNjA2MDQyMzUzNTZaMHsxCzAJBgNVBAYTAlVTMQswCQYDVQQIDAJXQTEQMA4GA1UEBwwHU2VhdHRsZTEVMBMGA1UECgwMVm9pY2VMaW5rIEFJMTYwNAYDVQQDDC12b2ljZWxpbmthaS1nYXRld2F5LmVhc3R1cy5jbG91ZGFwcC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC7m+JfhP8uZv1G+xJl0R1Utyio4FoqvLlv2D8PuOg9NpypvgOKYmReLgfa1nZmwxA+geaEtetWlyj4rnsLORBIHytFP0qggpjtT4leXQSxGPY9QZgTUWUtbUmMOlll5u9R3tBECkRZEmgzSu15XW3KsA4sd+G1+Rx3g6HI2BsDTl1anMZMyo94ZssH6FF65juO84DER/hs++QyQ3wRGXQwJ5ViI8uhdiaE75ZQUChPLfYLvHELfz1/Nv+SQTctDsRTtdzGMpOKKke4+kAqUNNIXLK/HWUbN6Hb1tmIbZ3tLYkhrZaX7yymwmwRm0a4D7Bxzqa8qjj1Gl6T2BUmcleXAgMBAAGjUzBRMB0GA1UdDgQWBBRQmuaAOxOrWTWYNJXlZaTOA+omezAfBgNVHSMEGDAWgBRQmuaAOxOrWTWYNJXlZaTOA+omezAPBgNVHRMBAf8EBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQAQenRbdVVjgpb1exejVCNvUP2ajXBiHOnDkE39P1bZN9o4Y/4TKi+6goF8mLEUOCoO7/ulb5s+6t/0xQtOrT+wi78Bq5ivAC2qTfyTcQmPM57y1M1Y+7yvFcR5bHh1G2PXj5eyiPUw4876W+azlDM2Jd/kw0KS73Jst+izaB88cWxLxzSCvlpXrm/nTToLsGux7e96BadswX0z8h7bAb8oep3SeCcJkIY5GjJHenY5ocBKE2+5xYsHOwYf90Nqml8yxqhWdteJMy5cISxalmLItexzgtBUqBKoCmZIB/8G6IjYgwdOcU7ZlqWus4ju8rhnT5gfdbX6KVupMCEs3a/MMQA=",
+      "resourceGroup": "SM-Test",
+      "type": "Microsoft.Network/applicationGateways/sslCertificates"
+    }
+  ],
+  "sslProfiles": [],
+  "tags": {},
+  "trustedClientCertificates": [],
+  "trustedRootCertificates": [],
+  "type": "Microsoft.Network/applicationGateways",
+  "urlPathMaps": []
+}

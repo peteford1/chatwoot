@@ -1,0 +1,41 @@
+# Full Chatwoot Installation Dockerfile for Azure Container Apps
+# Created: 2025-06-04 06:30:00
+# Purpose: Deploy complete Chatwoot with frontend and backend functionality
+# Previous: API-only backend was not working well, switching to full installation
+# 2025-06-04 06:30:00 - Changed from API-only to full installation due to API backend issues
+# 2025-06-06 19:00:00 - Added platform accounts index endpoint support
+
+FROM chatwoot/chatwoot:latest
+
+# Set environment variables for full installation
+ENV RAILS_ENV=production
+ENV CW_API_ONLY_SERVER=false
+ENV FORCE_SSL=false
+ENV RAILS_LOG_TO_STDOUT=true
+ENV ENABLE_ACCOUNT_SIGNUP=false
+
+# Copy our updated configurations for full installation
+COPY config/initializers/cors.rb /app/config/initializers/cors.rb
+COPY config/routes.rb /app/config/routes.rb
+
+# Copy updated platform controller and view for accounts index endpoint
+COPY app/controllers/platform/api/v1/accounts_controller.rb /app/app/controllers/platform/api/v1/accounts_controller.rb
+COPY app/views/platform/api/v1/accounts/index.json.jbuilder /app/app/views/platform/api/v1/accounts/index.json.jbuilder
+
+# Copy SyncAccounts implementation files
+# 2025-06-10 21:30:00 - Added SyncAccounts API for external system integration
+COPY app/controllers/api/v1/accounts/sync_accounts_controller.rb /app/app/controllers/api/v1/accounts/sync_accounts_controller.rb
+COPY lib/services/sync_accounts_service.rb /app/lib/services/sync_accounts_service.rb
+COPY lib/utilities/logger.rb /app/lib/utilities/logger.rb
+
+# Create installation marker
+RUN echo "Full Chatwoot with SyncAccounts API deployed: $(date)" > /app/FULL_INSTALLATION_INFO
+
+# Ensure proper permissions
+RUN chmod +x /app/docker/entrypoints/rails.sh
+
+WORKDIR /app
+
+# The container will start with full Chatwoot functionality
+# Frontend and backend both available
+EXPOSE 3000 

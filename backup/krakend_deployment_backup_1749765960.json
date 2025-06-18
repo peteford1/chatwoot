@@ -1,0 +1,207 @@
+{
+  "id": "/subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.App/containerapps/voicelinkai-gateway-instance-v32",
+  "identity": {
+    "principalId": "1c1f1bf8-8239-4526-9957-179200f682fe",
+    "tenantId": "b0491784-b7ef-4514-8c04-b812c2ab5ef0",
+    "type": "SystemAssigned"
+  },
+  "location": "East US",
+  "name": "voicelinkai-gateway-instance-v32",
+  "properties": {
+    "configuration": {
+      "activeRevisionsMode": "Single",
+      "dapr": null,
+      "identitySettings": [],
+      "ingress": {
+        "additionalPortMappings": null,
+        "allowInsecure": true,
+        "clientCertificateMode": null,
+        "corsPolicy": null,
+        "customDomains": [
+          {
+            "bindingType": "Disabled",
+            "name": "voicelinkai.com"
+          }
+        ],
+        "exposedPort": 0,
+        "external": true,
+        "fqdn": "voicelinkai-gateway-instance-v32.calmmushroom-30b1c815.eastus.azurecontainerapps.io",
+        "ipSecurityRestrictions": null,
+        "stickySessions": null,
+        "targetPort": 8080,
+        "traffic": [
+          {
+            "latestRevision": true,
+            "weight": 100
+          }
+        ],
+        "transport": "Auto"
+      },
+      "maxInactiveRevisions": null,
+      "registries": [
+        {
+          "identity": "",
+          "passwordSecretRef": "voicelinkcrmazurecrio-voicelinkcrm",
+          "server": "voicelinkcrm.azurecr.io",
+          "username": "voicelinkcrm"
+        },
+        {
+          "identity": "",
+          "passwordSecretRef": "voicelinkregistryazurecrio-voicelinkregistry",
+          "server": "voicelinkregistry.azurecr.io",
+          "username": "voicelinkregistry"
+        }
+      ],
+      "runtime": null,
+      "secrets": [
+        {
+          "name": "voicelinkcrmazurecrio-voicelinkcrm"
+        },
+        {
+          "name": "voicelinkregistryazurecrio-voicelinkregistry"
+        }
+      ],
+      "service": null
+    },
+    "customDomainVerificationId": "4395C0037B6AE3D7E3E337355B4FFF8D5DB2C448F197F6155A4B7299D98D9182",
+    "delegatedIdentities": [],
+    "environmentId": "/subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.App/managedEnvironments/chatwoot-env-test",
+    "eventStreamEndpoint": "https://eastus.azurecontainerapps.dev/subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/containerApps/voicelinkai-gateway-instance-v32/eventstream",
+    "latestReadyRevisionName": "voicelinkai-gateway-instance-v32--0000017",
+    "latestRevisionFqdn": "voicelinkai-gateway-instance-v32--0000017.calmmushroom-30b1c815.eastus.azurecontainerapps.io",
+    "latestRevisionName": "voicelinkai-gateway-instance-v32--0000017",
+    "managedEnvironmentId": "/subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.App/managedEnvironments/chatwoot-env-test",
+    "outboundIpAddresses": [
+      "20.231.246.122",
+      "20.231.246.54",
+      "40.121.19.105",
+      "40.121.18.246",
+      "40.121.18.166",
+      "40.121.18.60",
+      "40.121.18.21",
+      "40.121.18.44",
+      "40.121.18.41",
+      "40.121.18.248",
+      "40.121.18.82",
+      "40.121.19.108",
+      "20.231.247.19",
+      "40.121.19.125",
+      "40.121.18.46",
+      "40.117.125.130",
+      "40.121.18.52",
+      "40.121.18.33",
+      "40.121.18.238",
+      "40.121.19.2",
+      "40.121.19.122",
+      "40.121.19.19",
+      "40.121.18.114",
+      "20.231.246.253",
+      "40.121.18.255",
+      "40.121.18.164",
+      "40.117.121.106",
+      "40.121.18.27",
+      "40.121.18.156",
+      "40.121.18.117",
+      "40.121.18.197",
+      "40.121.18.133",
+      "40.121.18.112",
+      "40.121.18.106",
+      "20.241.227.6",
+      "40.121.19.89",
+      "40.121.19.83",
+      "40.121.18.131",
+      "40.121.18.201",
+      "40.121.18.170",
+      "40.121.18.242",
+      "13.92.130.42",
+      "40.121.19.42",
+      "40.121.18.73",
+      "40.121.18.43",
+      "20.241.226.169",
+      "40.121.19.74",
+      "40.121.19.40",
+      "40.121.18.62",
+      "40.121.18.244",
+      "20.127.248.50",
+      "20.241.171.30",
+      "20.169.229.88",
+      "20.169.229.46",
+      "20.169.229.29",
+      "20.169.229.38",
+      "20.169.229.62",
+      "20.169.229.109",
+      "20.169.229.92",
+      "20.169.229.27",
+      "20.169.229.51",
+      "20.169.229.42",
+      "20.241.172.248",
+      "48.216.192.198",
+      "40.90.243.232",
+      "40.90.242.126",
+      "135.237.112.47",
+      "51.8.74.190",
+      "4.157.197.142",
+      "172.210.91.191",
+      "172.210.90.42",
+      "40.90.243.227",
+      "40.90.243.72",
+      "20.241.172.250",
+      "52.234.235.220",
+      "57.152.55.92",
+      "172.212.36.156",
+      "172.210.121.45",
+      "172.214.2.208",
+      "20.246.203.138",
+      "20.246.203.140",
+      "13.82.216.169",
+      "13.82.216.172",
+      "13.82.216.149",
+      "52.170.33.171",
+      "48.216.198.196"
+    ],
+    "provisioningState": "Succeeded",
+    "runningStatus": "Running",
+    "template": {
+      "containers": [
+        {
+          "env": [
+            {
+              "name": "KRAKEND_CONFIG_VERSION",
+              "value": "fixed-headers-1749713044"
+            }
+          ],
+          "image": "voicelinkregistry.azurecr.io/voicelinkai-gateway:v48-fixed-headers-1749712948",
+          "name": "voicelinkai-gateway-instance-v32",
+          "resources": {
+            "cpu": 0.5,
+            "ephemeralStorage": "2Gi",
+            "memory": "1Gi"
+          }
+        }
+      ],
+      "initContainers": null,
+      "revisionSuffix": "",
+      "scale": {
+        "cooldownPeriod": 300,
+        "maxReplicas": 10,
+        "minReplicas": null,
+        "pollingInterval": 30,
+        "rules": null
+      },
+      "serviceBinds": null,
+      "terminationGracePeriodSeconds": null,
+      "volumes": null
+    },
+    "workloadProfileName": "Consumption"
+  },
+  "resourceGroup": "SM-Test",
+  "systemData": {
+    "createdAt": "2025-06-11T07:10:35.85844",
+    "createdBy": "admin@voicelinkai.com",
+    "createdByType": "User",
+    "lastModifiedAt": "2025-06-12T07:24:07.3854957",
+    "lastModifiedBy": "admin@voicelinkai.com",
+    "lastModifiedByType": "User"
+  },
+  "type": "Microsoft.App/containerApps"
+}

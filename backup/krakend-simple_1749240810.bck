@@ -1,0 +1,447 @@
+{
+  "$schema": "https://www.krakend.io/schema/v2.4/krakend.json",
+  "version": 3,
+  "name": "VoiceLink AI Gateway - Simple",
+  "timeout": "30s",
+  "cache_ttl": "300s",
+  "port": 8080,
+  "endpoints": [
+    {
+      "endpoint": "/health",
+      "method": "GET",
+      "output_encoding": "json",
+      "extra_config": {
+        "proxy": {
+          "static": {
+            "data": {
+              "status": "ok",
+              "service": "krakend-gateway"
+            },
+            "strategy": "always"
+          }
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/",
+          "method": "GET",
+          "host": ["https://httpbin.org"],
+          "disable_host_sanitize": false
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/v1/messages",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Content-Type",
+        "Authorization",
+        "X-User-ID",
+        "X-User-Role",
+        "User-Agent"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/api/v1/search/messages",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ]
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/v1/accounts/{account_id}/search/messages",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Content-Type",
+        "Authorization",
+        "X-User-ID",
+        "X-User-Role",
+        "User-Agent"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/api/v1/accounts/{account_id}/search/messages",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ]
+        }
+      ]
+    },
+    {
+      "endpoint": "/api",
+      "method": "GET",
+      "output_encoding": "json",
+      "extra_config": {
+        "proxy": {
+          "static": {
+            "data": {
+              "version": "4.2.0",
+              "timestamp": "2025-06-05T01:43:00Z",
+              "queue_services": "ok",
+              "data_services": "ok",
+              "status": "healthy",
+              "gateway": "krakend-v2.4.1"
+            },
+            "strategy": "always"
+          }
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/",
+          "method": "GET", 
+          "host": ["https://httpbin.org"],
+          "disable_host_sanitize": false
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/v1/accounts/{account_id}/conversations",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Content-Type",
+        "Authorization",
+        "X-User-ID", 
+        "X-User-Role",
+        "User-Agent"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/api/v1/accounts/{account_id}/conversations",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ]
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/v1/widget/config",
+      "method": "POST", 
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Content-Type",
+        "Authorization",
+        "X-Website-Token",
+        "User-Agent",
+        "Origin"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/api/v1/widget/config",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ]
+        }
+      ]
+    },
+    {
+      "endpoint": "/twilio/callback",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Content-Type",
+        "User-Agent",
+        "X-Twilio-Signature"
+      ],
+      "extra_config": {
+        "security/policies": {
+          "max_conn": 200,
+          "max_conn_per_ip": 100
+        },
+        "qos/ratelimit/router": {
+          "max_rate": 500,
+          "client_max_rate": 50,
+          "strategy": "ip"
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/twilio/callback",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "backend/http": {
+              "return_error_code": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/twilio/delivery_status",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Content-Type",
+        "User-Agent",
+        "X-Twilio-Signature"
+      ],
+      "extra_config": {
+        "security/policies": {
+          "max_conn": 200,
+          "max_conn_per_ip": 100
+        },
+        "qos/ratelimit/router": {
+          "max_rate": 500,
+          "client_max_rate": 50,
+          "strategy": "ip"
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/twilio/delivery_status",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "backend/http": {
+              "return_error_code": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/backend/status",
+      "method": "GET",
+      "output_encoding": "json",
+      "headers_to_pass": [
+        "Content-Type",
+        "Authorization",
+        "User-Agent"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/api",
+          "encoding": "json",
+          "method": "GET",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "backend/http": {
+              "return_error_code": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/platform/api/v1/accounts",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Content-Type",
+        "api_access_token",
+        "HTTP_API_ACCESS_TOKEN",
+        "User-Agent"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/platform/api/v1/accounts",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "backend/http": {
+              "return_error_code": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/platform/api/v1/accounts",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Content-Type",
+        "api_access_token",
+        "HTTP_API_ACCESS_TOKEN",
+        "User-Agent"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/platform/api/v1/accounts",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "backend/http": {
+              "return_error_code": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/platform/api/v1/accounts/{account_id}",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Content-Type",
+        "api_access_token",
+        "HTTP_API_ACCESS_TOKEN",
+        "User-Agent"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/platform/api/v1/accounts/{account_id}",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "backend/http": {
+              "return_error_code": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/platform/api/v1/accounts/{account_id}",
+      "method": "PATCH",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Content-Type",
+        "api_access_token",
+        "HTTP_API_ACCESS_TOKEN",
+        "User-Agent"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/platform/api/v1/accounts/{account_id}",
+          "encoding": "no-op",
+          "method": "PATCH",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "backend/http": {
+              "return_error_code": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/platform/api/v1/users",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Content-Type",
+        "api_access_token",
+        "HTTP_API_ACCESS_TOKEN",
+        "User-Agent"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/platform/api/v1/users",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "backend/http": {
+              "return_error_code": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/platform/api/v1/users/{user_id}",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Content-Type",
+        "api_access_token",
+        "HTTP_API_ACCESS_TOKEN",
+        "User-Agent"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/platform/api/v1/users/{user_id}",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "backend/http": {
+              "return_error_code": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/platform/api/v1/users/{user_id}/login",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Content-Type",
+        "api_access_token",
+        "HTTP_API_ACCESS_TOKEN",
+        "User-Agent"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/platform/api/v1/users/{user_id}/login",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "backend/http": {
+              "return_error_code": true
+            }
+          }
+        }
+      ]
+    }
+  ],
+  
+  "extra_config": {
+    "security/cors": {
+      "allow_origins": ["*"],
+      "allow_methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"],
+      "allow_headers": ["*"],
+      "expose_headers": ["*"],
+      "max_age": "12h",
+      "allow_credentials": false,
+      "debug": true
+    },
+    "telemetry/logging": {
+      "level": "INFO",
+      "prefix": "[KRAKEND]",
+      "syslog": false,
+      "stdout": true
+    }
+  }
+} 

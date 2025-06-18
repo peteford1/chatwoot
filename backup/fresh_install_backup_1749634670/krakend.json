@@ -1,0 +1,1114 @@
+{
+  "$schema": "https://www.krakend.io/schema/v3.json",
+  "version": 3,
+  "tls": {
+    "public_key": "/etc/krakend/voicelinkai.com.crt",
+    "private_key": "/etc/krakend/voicelinkai.com.key"
+  },
+  "name": "VoiceLink AI Gateway",
+  "timeout": "30s",
+  "cache_ttl": "300s",
+  "host": [
+    "http://chatwoot-security-gateway.eastus.azurecontainer.io:8080",
+    "https://chatwoot-security-gateway.eastus.azurecontainer.io:8080"
+  ],
+  "endpoints": [
+    {
+      "endpoint": "/health",
+      "method": "GET",
+      "output_encoding": "json",
+      "headers_to_pass": [
+        "*"
+      ],
+      "extra_config": {
+        "security/policies": {
+          "max_conn": 1000,
+          "max_conn_per_ip": 100
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/__health",
+          "encoding": "json",
+          "method": "GET",
+          "host": [
+            "http://localhost:8080"
+          ],
+          "extra_config": {
+            "backend/http": {
+              "return_error_code": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/v1/widget/config",
+      "method": "POST", 
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "*"
+      ],
+      "extra_config": {
+        "security/policies": {
+          "max_conn": 100,
+          "max_conn_per_ip": 20
+        },
+        "qos/ratelimit/router": {
+          "max_rate": 100,
+          "client_max_rate": 10,
+          "strategy": "ip"
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/api/v1/widget/config",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "modifier/lua-backend": {
+              "sources": ["auth_transform.lua"],
+              "allow_open_libs": false
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/v1/widget/{conversation_id}/messages",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Authorization",
+        "X-Website-Token",
+        "User-Agent",
+        "Origin"
+      ],
+      "extra_config": {
+        "security/policies": {
+          "max_conn": 200,
+          "max_conn_per_ip": 50
+        },
+        "qos/ratelimit/router": {
+          "max_rate": 1000,
+          "client_max_rate": 100,
+          "strategy": "ip"
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/api/v1/widget/{conversation_id}/messages",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "modifier/lua-backend": {
+              "sources": ["auth_transform.lua"],
+              "allow_open_libs": false
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/v1/widget/conversations",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Content-Type",
+        "Authorization",
+        "X-Website-Token",
+        "User-Agent",
+        "Origin"
+      ],
+      "extra_config": {
+        "security/policies": {
+          "max_conn": 100,
+          "max_conn_per_ip": 30
+        },
+        "qos/ratelimit/router": {
+          "max_rate": 200,
+          "client_max_rate": 20,
+          "strategy": "ip"
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/api/v1/widget/conversations",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "modifier/lua-backend": {
+              "sources": ["auth_transform.lua"],
+              "allow_open_libs": false
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/admin/api/v1/{path}",
+      "method": "GET",
+      "output_encoding": "json",
+      "headers_to_pass": [
+        "Authorization",
+        "X-User-ID",
+        "X-User-Role"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "HS256",
+          "jwk_url": "https://your-auth-system.com/.well-known/jwks.json",
+          "audience": ["chatwoot-admin"],
+          "issuer": "https://your-auth-system.com",
+          "cache": true,
+          "roles_key": "roles",
+          "roles": ["admin", "administrator"]
+        },
+        "security/policies": {
+          "max_conn": 50,
+          "max_conn_per_ip": 10
+        },
+        "qos/ratelimit/router": {
+          "max_rate": 100,
+          "client_max_rate": 20,
+          "strategy": "header",
+          "key": "X-User-ID"
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/api/v1/{path}",
+          "encoding": "json",
+          "method": "GET",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "modifier/lua-backend": {
+              "sources": ["admin_auth_transform.lua"],
+              "allow_open_libs": false
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/v1/widget/messages",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Content-Type",
+        "Authorization",
+        "X-Website-Token",
+        "User-Agent",
+        "Origin"
+      ],
+      "extra_config": {
+        "security/policies": {
+          "max_conn": 200,
+          "max_conn_per_ip": 50
+        },
+        "qos/ratelimit/router": {
+          "max_rate": 500,
+          "client_max_rate": 50,
+          "strategy": "ip"
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/api/v1/widget/messages",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "modifier/lua-backend": {
+              "sources": ["auth_transform.lua"],
+              "allow_open_libs": false
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/v1/widget/messages/{id}",
+      "method": "PUT",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Content-Type",
+        "Authorization",
+        "X-Website-Token",
+        "User-Agent",
+        "Origin"
+      ],
+      "extra_config": {
+        "security/policies": {
+          "max_conn": 200,
+          "max_conn_per_ip": 50
+        },
+        "qos/ratelimit/router": {
+          "max_rate": 500,
+          "client_max_rate": 50,
+          "strategy": "ip"
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/api/v1/widget/messages/{id}",
+          "encoding": "no-op",
+          "method": "PUT",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "modifier/lua-backend": {
+              "sources": ["auth_transform.lua"],
+              "allow_open_libs": false
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/v1/widget/contact",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Authorization",
+        "X-Website-Token",
+        "User-Agent",
+        "Origin"
+      ],
+      "extra_config": {
+        "security/policies": {
+          "max_conn": 200,
+          "max_conn_per_ip": 50
+        },
+        "qos/ratelimit/router": {
+          "max_rate": 500,
+          "client_max_rate": 50,
+          "strategy": "ip"
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/api/v1/widget/contact",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "modifier/lua-backend": {
+              "sources": ["auth_transform.lua"],
+              "allow_open_libs": false
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/v1/widget/contact",
+      "method": "PUT",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Content-Type",
+        "Authorization",
+        "X-Website-Token",
+        "User-Agent",
+        "Origin"
+      ],
+      "extra_config": {
+        "security/policies": {
+          "max_conn": 200,
+          "max_conn_per_ip": 50
+        },
+        "qos/ratelimit/router": {
+          "max_rate": 500,
+          "client_max_rate": 50,
+          "strategy": "ip"
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/api/v1/widget/contact",
+          "encoding": "no-op",
+          "method": "PUT",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "modifier/lua-backend": {
+              "sources": ["auth_transform.lua"],
+              "allow_open_libs": false
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/webhooks/whatsapp/{phone_number}",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Content-Type",
+        "User-Agent",
+        "X-Hub-Signature"
+      ],
+      "extra_config": {
+        "security/policies": {
+          "max_conn": 200,
+          "max_conn_per_ip": 100
+        },
+        "qos/ratelimit/router": {
+          "max_rate": 500,
+          "client_max_rate": 50,
+          "strategy": "ip"
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/webhooks/whatsapp/{phone_number}",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "modifier/lua-backend": {
+              "sources": ["twilio_webhook_transform.lua"],
+              "allow_open_libs": false
+            },
+            "backend/http": {
+              "return_error_code": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/webhooks/instagram",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Content-Type",
+        "User-Agent",
+        "X-Hub-Signature"
+      ],
+      "extra_config": {
+        "security/policies": {
+          "max_conn": 200,
+          "max_conn_per_ip": 100
+        },
+        "qos/ratelimit/router": {
+          "max_rate": 500,
+          "client_max_rate": 50,
+          "strategy": "ip"
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/webhooks/instagram",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "modifier/lua-backend": {
+              "sources": ["twilio_webhook_transform.lua"],
+              "allow_open_libs": false
+            },
+            "backend/http": {
+              "return_error_code": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/twilio/callback",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Content-Type",
+        "User-Agent",
+        "X-Twilio-Signature"
+      ],
+      "extra_config": {
+        "security/policies": {
+          "max_conn": 200,
+          "max_conn_per_ip": 100
+        },
+        "qos/ratelimit/router": {
+          "max_rate": 500,
+          "client_max_rate": 50,
+          "strategy": "ip"
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/twilio/callback",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "backend/http": {
+              "return_error_code": true
+            },
+            "modifier/lua-backend": {
+              "sources": ["twilio_webhook_transform.lua"],
+              "allow_open_libs": false
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/twilio/delivery_status",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Content-Type",
+        "User-Agent",
+        "X-Twilio-Signature"
+      ],
+      "extra_config": {
+        "security/policies": {
+          "max_conn": 200,
+          "max_conn_per_ip": 100
+        },
+        "qos/ratelimit/router": {
+          "max_rate": 500,
+          "client_max_rate": 50,
+          "strategy": "ip"
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/twilio/delivery_status",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "backend/http": {
+              "return_error_code": true
+            },
+            "modifier/lua-backend": {
+              "sources": ["twilio_webhook_transform.lua"],
+              "allow_open_libs": false
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/webhooks/telegram/{bot_token}",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Content-Type",
+        "User-Agent"
+      ],
+      "extra_config": {
+        "security/policies": {
+          "max_conn": 200,
+          "max_conn_per_ip": 100
+        },
+        "qos/ratelimit/router": {
+          "max_rate": 500,
+          "client_max_rate": 50,
+          "strategy": "ip"
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/webhooks/telegram/{bot_token}",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "modifier/lua-backend": {
+              "sources": ["twilio_webhook_transform.lua"],
+              "allow_open_libs": false
+            },
+            "backend/http": {
+              "return_error_code": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/webhooks/twitter",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Content-Type",
+        "User-Agent"
+      ],
+      "extra_config": {
+        "security/policies": {
+          "max_conn": 200,
+          "max_conn_per_ip": 100
+        },
+        "qos/ratelimit/router": {
+          "max_rate": 500,
+          "client_max_rate": 50,
+          "strategy": "ip"
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/webhooks/twitter",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "modifier/lua-backend": {
+              "sources": ["general_webhook_transform.lua"],
+              "allow_open_libs": false
+            },
+            "backend/http": {
+              "return_error_code": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/webhooks/twitter",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Content-Type",
+        "User-Agent",
+        "X-Twitter-Webhooks-Signature"
+      ],
+      "extra_config": {
+        "security/policies": {
+          "max_conn": 200,
+          "max_conn_per_ip": 100
+        },
+        "qos/ratelimit/router": {
+          "max_rate": 500,
+          "client_max_rate": 50,
+          "strategy": "ip"
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/webhooks/twitter",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "modifier/lua-backend": {
+              "sources": ["general_webhook_transform.lua"],
+              "allow_open_libs": false
+            },
+            "backend/http": {
+              "return_error_code": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/webhooks/line/{line_channel_id}",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Content-Type",
+        "User-Agent",
+        "X-Line-Signature"
+      ],
+      "extra_config": {
+        "security/policies": {
+          "max_conn": 200,
+          "max_conn_per_ip": 100
+        },
+        "qos/ratelimit/router": {
+          "max_rate": 500,
+          "client_max_rate": 50,
+          "strategy": "ip"
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/webhooks/line/{line_channel_id}",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "modifier/lua-backend": {
+              "sources": ["general_webhook_transform.lua"],
+              "allow_open_libs": false
+            },
+            "backend/http": {
+              "return_error_code": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/webhooks/sms/{phone_number}",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Content-Type",
+        "User-Agent"
+      ],
+      "extra_config": {
+        "security/policies": {
+          "max_conn": 200,
+          "max_conn_per_ip": 100
+        },
+        "qos/ratelimit/router": {
+          "max_rate": 500,
+          "client_max_rate": 50,
+          "strategy": "ip"
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/webhooks/sms/{phone_number}",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "modifier/lua-backend": {
+              "sources": ["general_webhook_transform.lua"],
+              "allow_open_libs": false
+            },
+            "backend/http": {
+              "return_error_code": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/webhooks/whatsapp/{phone_number}",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Content-Type",
+        "User-Agent"
+      ],
+      "extra_config": {
+        "security/policies": {
+          "max_conn": 200,
+          "max_conn_per_ip": 100
+        },
+        "qos/ratelimit/router": {
+          "max_rate": 500,
+          "client_max_rate": 50,
+          "strategy": "ip"
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/webhooks/whatsapp/{phone_number}",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "modifier/lua-backend": {
+              "sources": ["general_webhook_transform.lua"],
+              "allow_open_libs": false
+            },
+            "backend/http": {
+              "return_error_code": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/webhooks/instagram",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Content-Type",
+        "User-Agent"
+      ],
+      "extra_config": {
+        "security/policies": {
+          "max_conn": 200,
+          "max_conn_per_ip": 100
+        },
+        "qos/ratelimit/router": {
+          "max_rate": 500,
+          "client_max_rate": 50,
+          "strategy": "ip"
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/webhooks/instagram",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "modifier/lua-backend": {
+              "sources": ["general_webhook_transform.lua"],
+              "allow_open_libs": false
+            },
+            "backend/http": {
+              "return_error_code": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/webhooks/stripe",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Content-Type",
+        "User-Agent",
+        "Stripe-Signature"
+      ],
+      "extra_config": {
+        "security/policies": {
+          "max_conn": 200,
+          "max_conn_per_ip": 100
+        },
+        "qos/ratelimit/router": {
+          "max_rate": 500,
+          "client_max_rate": 50,
+          "strategy": "ip"
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/webhooks/stripe",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "modifier/lua-backend": {
+              "sources": ["general_webhook_transform.lua"],
+              "allow_open_libs": false
+            },
+            "backend/http": {
+              "return_error_code": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/webhooks/firecrawl",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Content-Type",
+        "User-Agent",
+        "Authorization"
+      ],
+      "extra_config": {
+        "security/policies": {
+          "max_conn": 200,
+          "max_conn_per_ip": 100
+        },
+        "qos/ratelimit/router": {
+          "max_rate": 500,
+          "client_max_rate": 50,
+          "strategy": "ip"
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/webhooks/firecrawl",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "modifier/lua-backend": {
+              "sources": ["general_webhook_transform.lua"],
+              "allow_open_libs": false
+            },
+            "backend/http": {
+              "return_error_code": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/cable",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Connection",
+        "Upgrade",
+        "Sec-WebSocket-Key",
+        "Sec-WebSocket-Version",
+        "Sec-WebSocket-Protocol",
+        "Authorization"
+      ],
+      "extra_config": {
+        "security/policies": {
+          "max_conn": 1000,
+          "max_conn_per_ip": 100
+        },
+        "qos/ratelimit/router": {
+          "max_rate": 1000,
+          "client_max_rate": 100,
+          "strategy": "ip"
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/cable",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "backend/http": {
+              "return_error_code": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/platform/api/v1/accounts",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Content-Type",
+        "api_access_token",
+        "HTTP_API_ACCESS_TOKEN",
+        "User-Agent",
+        "Authorization"
+      ],
+      "extra_config": {
+        "security/policies": {
+          "max_conn": 100,
+          "max_conn_per_ip": 20
+        },
+        "qos/ratelimit/router": {
+          "max_rate": 200,
+          "client_max_rate": 20,
+          "strategy": "header",
+          "key": "api_access_token"
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/platform/api/v1/accounts",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "modifier/lua-backend": {
+              "sources": ["admin_auth_transform.lua"],
+              "allow_open_libs": false
+            },
+            "backend/http": {
+              "return_error_code": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/platform/api/v1/accounts/{account_id}",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Content-Type",
+        "api_access_token",
+        "HTTP_API_ACCESS_TOKEN",
+        "User-Agent",
+        "Authorization"
+      ],
+      "extra_config": {
+        "security/policies": {
+          "max_conn": 100,
+          "max_conn_per_ip": 20
+        },
+        "qos/ratelimit/router": {
+          "max_rate": 200,
+          "client_max_rate": 20,
+          "strategy": "header",
+          "key": "api_access_token"
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/platform/api/v1/accounts/{account_id}",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "modifier/lua-backend": {
+              "sources": ["admin_auth_transform.lua"],
+              "allow_open_libs": false
+            },
+            "backend/http": {
+              "return_error_code": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/v1/accounts/{account_id}/sync_accounts",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Content-Type",
+        "Authorization",
+        "User-Agent"
+      ],
+      "extra_config": {
+        "security/policies": {
+          "max_conn": 100,
+          "max_conn_per_ip": 20
+        },
+        "qos/ratelimit/router": {
+          "max_rate": 200,
+          "client_max_rate": 20,
+          "strategy": "ip"
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/api/v1/accounts/{account_id}/sync_accounts",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "backend/http": {
+              "return_error_code": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/app/{path}",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "*"
+      ],
+      "extra_config": {
+        "security/policies": {
+          "max_conn": 5000,
+          "max_conn_per_ip": 500
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/{path}",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "https://chatwoot-frontend-test.wittyglacier-20309971.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "backend/http": {
+              "return_error_code": true
+            }
+          }
+        }
+      ]
+    }
+  ],
+
+  "extra_config": {
+    "security/cors": {
+      "allow_origins": [
+        "*"
+      ],
+      "allow_methods": [
+        "POST",
+        "GET",
+        "PUT",
+        "DELETE",
+        "OPTIONS",
+        "HEAD"
+      ],
+      "allow_headers": [
+        "*"
+      ],
+      "expose_headers": [
+        "*"
+      ],
+      "max_age": "12h",
+      "allow_credentials": false,
+      "debug": true
+    },
+    "security/http": {
+      "allowed_hosts": [],
+      "ssl_proxy_headers": {
+        "X-Forwarded-Proto": "https"
+      },
+      "sts_seconds": 31536000,
+      "frame_deny": true,
+      "content_type_nosniff": true,
+      "browser_xss_filter": true
+    },
+    "telemetry/logging": {
+      "level": "INFO",
+      "prefix": "[KRAKEND]",
+      "syslog": false,
+      "stdout": true
+    },
+    "telemetry/metrics": {
+      "collection_time": "60s",
+      "proxy_disabled": false,
+      "router_disabled": false,
+      "backend_disabled": false,
+      "endpoint_disabled": false,
+      "listen_address": ":8090"
+    }
+  }
+} 

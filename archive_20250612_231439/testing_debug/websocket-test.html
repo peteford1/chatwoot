@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .connected { background-color: #d4edda; color: #155724; }
+        .disconnected { background-color: #f8d7da; color: #721c24; }
+        .connecting { background-color: #fff3cd; color: #856404; }
+        .log {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+            margin: 10px 0;
+        }
+        .controls {
+            margin: 10px 0;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        input[type="text"] {
+            padding: 8px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>WebSocket Test Page</h1>
+        
+        <div id="status" class="status disconnected">
+            Disconnected
+        </div>
+        
+        <div class="controls">
+            <button id="connect-btn">Connect</button>
+            <button id="disconnect-btn" disabled>Disconnect</button>
+            <button id="auth-btn" disabled>Authenticate</button>
+            <button id="join-btn" disabled>Join Conversation</button>
+        </div>
+        
+        <div class="controls">
+            <input type="text" id="message-input" placeholder="Enter message..." disabled>
+            <button id="send-btn" disabled>Send Message</button>
+            <button id="typing-btn" disabled>Toggle Typing</button>
+        </div>
+        
+        <div class="log" id="log"></div>
+        
+        <div class="controls">
+            <button id="clear-log">Clear Log</button>
+        </div>
+    </div>
+
+    <script>
+        let websocket = null;
+        let isTyping = false;
+        
+        const statusEl = document.getElementById('status');
+        const logEl = document.getElementById('log');
+        const connectBtn = document.getElementById('connect-btn');
+        const disconnectBtn = document.getElementById('disconnect-btn');
+        const authBtn = document.getElementById('auth-btn');
+        const joinBtn = document.getElementById('join-btn');
+        const messageInput = document.getElementById('message-input');
+        const sendBtn = document.getElementById('send-btn');
+        const typingBtn = document.getElementById('typing-btn');
+        const clearLogBtn = document.getElementById('clear-log');
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.innerHTML = `<span style="color: #666;">[${timestamp}]</span> ${message}`;
+            if (type === 'error') logEntry.style.color = 'red';
+            if (type === 'success') logEntry.style.color = 'green';
+            if (type === 'received') logEntry.style.color = 'blue';
+            logEl.appendChild(logEntry);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+        
+        function updateStatus(status, className) {
+            statusEl.textContent = status;
+            statusEl.className = `status ${className}`;
+        }
+        
+        function updateButtons(connected) {
+            connectBtn.disabled = connected;
+            disconnectBtn.disabled = !connected;
+            authBtn.disabled = !connected;
+            joinBtn.disabled = !connected;
+            messageInput.disabled = !connected;
+            sendBtn.disabled = !connected;
+            typingBtn.disabled = !connected;
+        }
+        
+        connectBtn.addEventListener('click', () => {
+            updateStatus('Connecting...', 'connecting');
+            log('Connecting to WebSocket server...');
+            
+            websocket = new WebSocket('ws://localhost:8001');
+            
+            websocket.onopen = function(event) {
+                log('✅ Connected to WebSocket server', 'success');
+                updateStatus('Connected', 'connected');
+                updateButtons(true);
+            };
+            
+            websocket.onmessage = function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    log(`📥 Received: ${JSON.stringify(data, null, 2)}`, 'received');
+                } catch (error) {
+                    log(`📥 Received (raw): ${event.data}`, 'received');
+                }
+            };
+            
+            websocket.onclose = function(event) {
+                log('❌ Disconnected from WebSocket server');
+                updateStatus('Disconnected', 'disconnected');
+                updateButtons(false);
+                websocket = null;
+            };
+            
+            websocket.onerror = function(error) {
+                log(`🚨 WebSocket error: ${error}`, 'error');
+                updateStatus('Error', 'disconnected');
+            };
+        });
+        
+        disconnectBtn.addEventListener('click', () => {
+            if (websocket) {
+                websocket.close();
+            }
+        });
+        
+        authBtn.addEventListener('click', () => {
+            if (websocket && websocket.readyState === WebSocket.OPEN) {
+                const authMessage = {
+                    type: 'auth',
+                    user_id: 1,
+                    user_name: 'Test User',
+                    organization_id: 1
+                };
+                websocket.send(JSON.stringify(authMessage));
+                log(`📤 Sent: ${JSON.stringify(authMessage, null, 2)}`);
+            }
+        });
+        
+        joinBtn.addEventListener('click', () => {
+            if (websocket && websocket.readyState === WebSocket.OPEN) {
+                const joinMessage = {
+                    type: 'join_conversation',
+                    conversation_id: 1,
+                    user_id: 1,
+                    user_name: 'Test User'
+                };
+                websocket.send(JSON.stringify(joinMessage));
+                log(`📤 Sent: ${JSON.stringify(joinMessage, null, 2)}`);
+            }
+        });
+        
+        sendBtn.addEventListener('click', () => {
+            const message = messageInput.value.trim();
+            if (message && websocket && websocket.readyState === WebSocket.OPEN) {
+                const messageObj = {
+                    type: 'message',
+                    conversation_id: 1,
+                    content: message,
+                    sender_id: 1,
+                    sender_name: 'Test User',
+                    sender_type: 'agent'
+                };
+                websocket.send(JSON.stringify(messageObj));
+                log(`📤 Sent: ${JSON.stringify(messageObj, null, 2)}`);
+                messageInput.value = '';
+            }
+        });
+        
+        typingBtn.addEventListener('click', () => {
+            if (websocket && websocket.readyState === WebSocket.OPEN) {
+                isTyping = !isTyping;
+                const typingMessage = {
+                    type: 'typing',
+                    conversation_id: 1,
+                    user_id: 1,
+                    user_name: 'Test User',
+                    is_typing: isTyping
+                };
+                websocket.send(JSON.stringify(typingMessage));
+                log(`📤 Sent: ${JSON.stringify(typingMessage, null, 2)}`);
+                typingBtn.textContent = isTyping ? 'Stop Typing' : 'Start Typing';
+            }
+        });
+        
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendBtn.click();
+            }
+        });
+        
+        clearLogBtn.addEventListener('click', () => {
+            logEl.innerHTML = '';
+        });
+        
+        // Initialize
+        updateButtons(false);
+        log('WebSocket test page loaded. Click "Connect" to start testing.');
+    </script>
+</body>
+</html> 

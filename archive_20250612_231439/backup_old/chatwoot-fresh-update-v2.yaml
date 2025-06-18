@@ -1,0 +1,25 @@
+properties:
+  template:
+    containers:
+    - name: chatwoot-fresh
+      image: chatwoot/chatwoot:latest
+      command: ["/docker/entrypoints/rails.sh"]
+      env:
+      - name: DATABASE_URL
+        value: "postgresql://chatwootuser:P@ssword456!@chatwoot-db-fresh.postgres.database.azure.com/chatwoot"
+      - name: REDIS_URL
+        value: "redis://localhost:6379"
+      - name: RAILS_ENV
+        value: "production"
+      - name: SECRET_KEY_BASE
+        value: "your-secret-key-base-replace-this-in-production"
+      resources:
+        cpu: 0.75
+        memory: "1.5Gi"
+    - name: redis
+      image: redis:7-alpine
+      command: ["redis-server"]
+      args: ["--appendonly", "yes", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru"]
+      resources:
+        cpu: 0.25
+        memory: "0.5Gi" 

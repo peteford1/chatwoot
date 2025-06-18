@@ -1,12 +1,11 @@
 class CreateCaptainTables < ActiveRecord::Migration[7.0]
   def up
-    # Post this migration, the 'vector' extension is mandatory to run the application.
-    # If the extension is not installed, the migration will raise an error.
-    setup_vector_extension
+    # Skipping vector extension setup for development purposes
+    # setup_vector_extension
     create_assistants
     create_documents
-    create_assistant_responses
-    create_old_tables
+    create_assistant_responses_without_vector
+    create_old_tables_without_vector
   end
 
   def down
@@ -60,11 +59,11 @@ class CreateCaptainTables < ActiveRecord::Migration[7.0]
     add_index :captain_documents, [:assistant_id, :external_link], unique: true
   end
 
-  def create_assistant_responses
+  def create_assistant_responses_without_vector
     create_table :captain_assistant_responses do |t|
       t.string :question, null: false
       t.text :answer, null: false
-      t.vector :embedding, limit: 1536
+      t.text :embedding # Using text instead of vector for development
       t.bigint :assistant_id, null: false
       t.bigint :document_id
       t.bigint :account_id, null: false
@@ -75,16 +74,18 @@ class CreateCaptainTables < ActiveRecord::Migration[7.0]
     add_index :captain_assistant_responses, :account_id
     add_index :captain_assistant_responses, :assistant_id
     add_index :captain_assistant_responses, :document_id
-    add_index :captain_assistant_responses, :embedding, using: :ivfflat, name: 'vector_idx_knowledge_entries_embedding', opclass: :vector_l2_ops
+    # Skipping vector index
+    # add_index :captain_assistant_responses, :embedding, using: :ivfflat, name: 'vector_idx_knowledge_entries_embedding', opclass: :vector_l2_ops
   end
 
-  def create_old_tables
+  def create_old_tables_without_vector
     create_table :article_embeddings, if_not_exists: true do |t|
       t.bigint :article_id, null: false
       t.text :term, null: false
-      t.vector :embedding, limit: 1536
+      t.text :embedding # Using text instead of vector for development
       t.timestamps
     end
-    add_index :article_embeddings, :embedding, if_not_exists: true, using: :ivfflat, opclass: :vector_l2_ops
+    # Skipping vector index
+    # add_index :article_embeddings, :embedding, if_not_exists: true, using: :ivfflat, opclass: :vector_l2_ops
   end
 end

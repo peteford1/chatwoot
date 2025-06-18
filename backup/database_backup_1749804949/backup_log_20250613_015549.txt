@@ -1,0 +1,6 @@
+ERROR: 'export' is misspelled or not recognized by the system.
+
+Examples from AI knowledge base:
+https://aka.ms/cli_ref
+Read more about the command in reference docs
+INFO: Command ran in 1.594 seconds (init: 0.066, invoke: 1.529)

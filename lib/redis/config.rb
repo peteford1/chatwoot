@@ -10,13 +10,19 @@ module Redis::Config
     end
 
     def base_config
-      {
+      config = {
         url: ENV.fetch('REDIS_URL', 'redis://127.0.0.1:6379'),
-        password: ENV.fetch('REDIS_PASSWORD', nil).presence,
         ssl_params: { verify_mode: Chatwoot.redis_ssl_verify_mode },
         reconnect_attempts: 2,
         timeout: 1
       }
+      
+      # Only add password if it's actually set to avoid ERR AUTH error when Redis has no password
+      # See: https://github.com/redis/redis-rb/issues/931
+      password = ENV.fetch('REDIS_PASSWORD', nil).presence
+      config[:password] = password if password
+      
+      config
     end
 
     def sentinel?

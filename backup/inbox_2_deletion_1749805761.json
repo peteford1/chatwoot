@@ -1,0 +1,320 @@
+{
+  "deletion_timestamp": "2025-06-13T02:09:21-0700",
+  "account_id": 1,
+  "inbox_deleted": {
+    "id": 2,
+    "avatar_url": "",
+    "channel_id": 2,
+    "name": "VoiceLinkAI - SMS (+19795412927)",
+    "channel_type": "Channel::Sms",
+    "greeting_enabled": false,
+    "greeting_message": null,
+    "working_hours_enabled": false,
+    "enable_email_collect": true,
+    "csat_survey_enabled": false,
+    "csat_config": {
+    },
+    "enable_auto_assignment": true,
+    "auto_assignment_config": {
+    },
+    "out_of_office_message": null,
+    "working_hours": [
+      {
+        "day_of_week": 0,
+        "closed_all_day": true,
+        "open_hour": null,
+        "open_minutes": null,
+        "close_hour": null,
+        "close_minutes": null,
+        "open_all_day": false
+      },
+      {
+        "day_of_week": 1,
+        "closed_all_day": false,
+        "open_hour": 9,
+        "open_minutes": 0,
+        "close_hour": 17,
+        "close_minutes": 0,
+        "open_all_day": false
+      },
+      {
+        "day_of_week": 2,
+        "closed_all_day": false,
+        "open_hour": 9,
+        "open_minutes": 0,
+        "close_hour": 17,
+        "close_minutes": 0,
+        "open_all_day": false
+      },
+      {
+        "day_of_week": 3,
+        "closed_all_day": false,
+        "open_hour": 9,
+        "open_minutes": 0,
+        "close_hour": 17,
+        "close_minutes": 0,
+        "open_all_day": false
+      },
+      {
+        "day_of_week": 4,
+        "closed_all_day": false,
+        "open_hour": 9,
+        "open_minutes": 0,
+        "close_hour": 17,
+        "close_minutes": 0,
+        "open_all_day": false
+      },
+      {
+        "day_of_week": 5,
+        "closed_all_day": false,
+        "open_hour": 9,
+        "open_minutes": 0,
+        "close_hour": 17,
+        "close_minutes": 0,
+        "open_all_day": false
+      },
+      {
+        "day_of_week": 6,
+        "closed_all_day": true,
+        "open_hour": null,
+        "open_minutes": null,
+        "close_hour": null,
+        "close_minutes": null,
+        "open_all_day": false
+      }
+    ],
+    "timezone": "UTC",
+    "callback_webhook_url": "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io/webhooks/sms/19795412927",
+    "allow_messages_after_resolved": true,
+    "lock_to_single_conversation": false,
+    "sender_name_type": "friendly",
+    "business_name": null,
+    "widget_color": null,
+    "website_url": null,
+    "hmac_mandatory": null,
+    "welcome_title": null,
+    "welcome_tagline": null,
+    "web_widget_script": null,
+    "website_token": null,
+    "selected_feature_flags": null,
+    "reply_time": null,
+    "messaging_service_sid": null,
+    "phone_number": "19795412927",
+    "provider": "default"
+  },
+  "reason": "Duplicate phone number cleanup - keeping inbox 6 with proper +19795412927 format",
+  "phone_number_issue": "Inbox 2 has '19795412927' without +, Inbox 6 has '+19795412927' with +",
+  "webhook_conflict": "Both inboxes use same webhook URL ending in /19795412927",
+  "api_token_used": "baea8676c...",
+  "deletion_status": "success",
+  "deletion_response_code": 200,
+  "deletion_response_body": "{\"message\":\"Your inbox deletion request will be processed in some time.\"}",
+  "verification_status": "still_exists",
+  "final_verification": {
+    "remaining_sms_inboxes_count": 2,
+    "remaining_inboxes": [
+      {
+        "id": 2,
+        "avatar_url": "",
+        "channel_id": 2,
+        "name": "VoiceLinkAI - SMS (+19795412927)",
+        "channel_type": "Channel::Sms",
+        "greeting_enabled": false,
+        "greeting_message": null,
+        "working_hours_enabled": false,
+        "enable_email_collect": true,
+        "csat_survey_enabled": false,
+        "csat_config": {
+        },
+        "enable_auto_assignment": true,
+        "auto_assignment_config": {
+        },
+        "out_of_office_message": null,
+        "working_hours": [
+          {
+            "day_of_week": 0,
+            "closed_all_day": true,
+            "open_hour": null,
+            "open_minutes": null,
+            "close_hour": null,
+            "close_minutes": null,
+            "open_all_day": false
+          },
+          {
+            "day_of_week": 1,
+            "closed_all_day": false,
+            "open_hour": 9,
+            "open_minutes": 0,
+            "close_hour": 17,
+            "close_minutes": 0,
+            "open_all_day": false
+          },
+          {
+            "day_of_week": 2,
+            "closed_all_day": false,
+            "open_hour": 9,
+            "open_minutes": 0,
+            "close_hour": 17,
+            "close_minutes": 0,
+            "open_all_day": false
+          },
+          {
+            "day_of_week": 3,
+            "closed_all_day": false,
+            "open_hour": 9,
+            "open_minutes": 0,
+            "close_hour": 17,
+            "close_minutes": 0,
+            "open_all_day": false
+          },
+          {
+            "day_of_week": 4,
+            "closed_all_day": false,
+            "open_hour": 9,
+            "open_minutes": 0,
+            "close_hour": 17,
+            "close_minutes": 0,
+            "open_all_day": false
+          },
+          {
+            "day_of_week": 5,
+            "closed_all_day": false,
+            "open_hour": 9,
+            "open_minutes": 0,
+            "close_hour": 17,
+            "close_minutes": 0,
+            "open_all_day": false
+          },
+          {
+            "day_of_week": 6,
+            "closed_all_day": true,
+            "open_hour": null,
+            "open_minutes": null,
+            "close_hour": null,
+            "close_minutes": null,
+            "open_all_day": false
+          }
+        ],
+        "timezone": "UTC",
+        "callback_webhook_url": "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io/webhooks/sms/19795412927",
+        "allow_messages_after_resolved": true,
+        "lock_to_single_conversation": false,
+        "sender_name_type": "friendly",
+        "business_name": null,
+        "widget_color": null,
+        "website_url": null,
+        "hmac_mandatory": null,
+        "welcome_title": null,
+        "welcome_tagline": null,
+        "web_widget_script": null,
+        "website_token": null,
+        "selected_feature_flags": null,
+        "reply_time": null,
+        "messaging_service_sid": null,
+        "phone_number": "19795412927",
+        "provider": "default"
+      },
+      {
+        "id": 6,
+        "avatar_url": "",
+        "channel_id": 3,
+        "name": "VoiceLink SMS (+19795412927)",
+        "channel_type": "Channel::Sms",
+        "greeting_enabled": false,
+        "greeting_message": null,
+        "working_hours_enabled": false,
+        "enable_email_collect": true,
+        "csat_survey_enabled": false,
+        "csat_config": {
+        },
+        "enable_auto_assignment": true,
+        "auto_assignment_config": {
+        },
+        "out_of_office_message": null,
+        "working_hours": [
+          {
+            "day_of_week": 0,
+            "closed_all_day": true,
+            "open_hour": null,
+            "open_minutes": null,
+            "close_hour": null,
+            "close_minutes": null,
+            "open_all_day": false
+          },
+          {
+            "day_of_week": 1,
+            "closed_all_day": false,
+            "open_hour": 9,
+            "open_minutes": 0,
+            "close_hour": 17,
+            "close_minutes": 0,
+            "open_all_day": false
+          },
+          {
+            "day_of_week": 2,
+            "closed_all_day": false,
+            "open_hour": 9,
+            "open_minutes": 0,
+            "close_hour": 17,
+            "close_minutes": 0,
+            "open_all_day": false
+          },
+          {
+            "day_of_week": 3,
+            "closed_all_day": false,
+            "open_hour": 9,
+            "open_minutes": 0,
+            "close_hour": 17,
+            "close_minutes": 0,
+            "open_all_day": false
+          },
+          {
+            "day_of_week": 4,
+            "closed_all_day": false,
+            "open_hour": 9,
+            "open_minutes": 0,
+            "close_hour": 17,
+            "close_minutes": 0,
+            "open_all_day": false
+          },
+          {
+            "day_of_week": 5,
+            "closed_all_day": false,
+            "open_hour": 9,
+            "open_minutes": 0,
+            "close_hour": 17,
+            "close_minutes": 0,
+            "open_all_day": false
+          },
+          {
+            "day_of_week": 6,
+            "closed_all_day": true,
+            "open_hour": null,
+            "open_minutes": null,
+            "close_hour": null,
+            "close_minutes": null,
+            "open_all_day": false
+          }
+        ],
+        "timezone": "UTC",
+        "callback_webhook_url": "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io/webhooks/sms/19795412927",
+        "allow_messages_after_resolved": true,
+        "lock_to_single_conversation": false,
+        "sender_name_type": "friendly",
+        "business_name": null,
+        "widget_color": null,
+        "website_url": null,
+        "hmac_mandatory": null,
+        "welcome_title": null,
+        "welcome_tagline": null,
+        "web_widget_script": null,
+        "website_token": null,
+        "selected_feature_flags": null,
+        "reply_time": null,
+        "messaging_service_sid": null,
+        "phone_number": "+19795412927",
+        "provider": "default"
+      }
+    ]
+  }
+}

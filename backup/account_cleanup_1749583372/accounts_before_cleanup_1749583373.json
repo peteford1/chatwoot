@@ -1,0 +1,491 @@
+[
+  {
+    "id": 1,
+    "name": "Storefront",
+    "locale": "en",
+    "domain": null,
+    "support_email": "noreply@chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io",
+    "features": {
+    },
+    "custom_attributes": {
+    },
+    "limits": {
+    },
+    "status": "active"
+  },
+  {
+    "id": 2,
+    "name": "Test Tenant Account",
+    "locale": "en",
+    "domain": null,
+    "support_email": "noreply@chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io",
+    "features": {
+    },
+    "custom_attributes": {
+    },
+    "limits": {
+    },
+    "status": "active"
+  },
+  {
+    "id": 3,
+    "name": "Test Store 1749223585",
+    "locale": "en",
+    "domain": "http://localhost",
+    "support_email": "test-store-1749223585@example.com",
+    "features": {
+    },
+    "custom_attributes": {
+      "store_id": 1
+    },
+    "limits": {
+    },
+    "status": "active"
+  },
+  {
+    "id": 4,
+    "name": "Test Store 1749224605",
+    "locale": "en",
+    "domain": "http://localhost",
+    "support_email": "test-store-1749224605@example.com",
+    "features": {
+    },
+    "custom_attributes": {
+      "store_id": 1
+    },
+    "limits": {
+    },
+    "status": "active"
+  },
+  {
+    "id": 5,
+    "name": "Test Store 1749224605",
+    "locale": "en",
+    "domain": "http://localhost",
+    "support_email": "test-store-1749224605@example.com",
+    "features": {
+    },
+    "custom_attributes": {
+      "store_id": 1
+    },
+    "limits": {
+    },
+    "status": "active"
+  },
+  {
+    "id": 6,
+    "name": "Test Store 1749224605",
+    "locale": "en",
+    "domain": "http://localhost",
+    "support_email": "test-store-1749224605@example.com",
+    "features": {
+    },
+    "custom_attributes": {
+      "store_id": 1
+    },
+    "limits": {
+    },
+    "status": "active"
+  },
+  {
+    "id": 7,
+    "name": "Test Store 1749224722",
+    "locale": "en",
+    "domain": "http://localhost",
+    "support_email": "test-store-1749224722@example.com",
+    "features": {
+    },
+    "custom_attributes": {
+      "store_id": 1
+    },
+    "limits": {
+    },
+    "status": "active"
+  },
+  {
+    "id": 8,
+    "name": "Test Store 1749224722",
+    "locale": "en",
+    "domain": "http://localhost",
+    "support_email": "test-store-1749224722@example.com",
+    "features": {
+    },
+    "custom_attributes": {
+      "store_id": 1
+    },
+    "limits": {
+    },
+    "status": "active"
+  },
+  {
+    "id": 9,
+    "name": "Test Store 1749224722",
+    "locale": "en",
+    "domain": "http://localhost",
+    "support_email": "test-store-1749224722@example.com",
+    "features": {
+    },
+    "custom_attributes": {
+      "store_id": 1
+    },
+    "limits": {
+    },
+    "status": "active"
+  },
+  {
+    "id": 10,
+    "name": "Test Account API",
+    "locale": "en",
+    "domain": null,
+    "support_email": "noreply@chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io",
+    "features": {
+    },
+    "custom_attributes": {
+    },
+    "limits": {
+    },
+    "status": "active"
+  },
+  {
+    "id": 11,
+    "name": "Test Store Account 1749225660",
+    "locale": "en",
+    "domain": "http://localhost",
+    "support_email": "test@example.com",
+    "features": {
+    },
+    "custom_attributes": {
+      "store_id": "test_1749225660"
+    },
+    "limits": {
+    },
+    "status": "active"
+  },
+  {
+    "id": 12,
+    "name": "Test Store 1749225676",
+    "locale": "en",
+    "domain": "http://localhost",
+    "support_email": "test-store-1749225676@example.com",
+    "features": {
+    },
+    "custom_attributes": {
+      "store_id": 1
+    },
+    "limits": {
+    },
+    "status": "active"
+  },
+  {
+    "id": 13,
+    "name": "Test Store 1749225676",
+    "locale": "en",
+    "domain": "http://localhost",
+    "support_email": "test-store-1749225676@example.com",
+    "features": {
+    },
+    "custom_attributes": {
+      "store_id": 1
+    },
+    "limits": {
+    },
+    "status": "active"
+  },
+  {
+    "id": 14,
+    "name": "Test Store 1749225676",
+    "locale": "en",
+    "domain": "http://localhost",
+    "support_email": "test-store-1749225676@example.com",
+    "features": {
+    },
+    "custom_attributes": {
+      "store_id": 1
+    },
+    "limits": {
+    },
+    "status": "active"
+  },
+  {
+    "id": 15,
+    "name": "Test Store 1749225785",
+    "locale": "en",
+    "domain": "http://localhost",
+    "support_email": "test-store-1749225785@example.com",
+    "features": {
+    },
+    "custom_attributes": {
+      "store_id": 1
+    },
+    "limits": {
+    },
+    "status": "active"
+  },
+  {
+    "id": 16,
+    "name": "Test Store 1749225785",
+    "locale": "en",
+    "domain": "http://localhost",
+    "support_email": "test-store-1749225785@example.com",
+    "features": {
+    },
+    "custom_attributes": {
+      "store_id": 1
+    },
+    "limits": {
+    },
+    "status": "active"
+  },
+  {
+    "id": 17,
+    "name": "Test Store 1749225785",
+    "locale": "en",
+    "domain": "http://localhost",
+    "support_email": "test-store-1749225785@example.com",
+    "features": {
+    },
+    "custom_attributes": {
+      "store_id": 1
+    },
+    "limits": {
+    },
+    "status": "active"
+  },
+  {
+    "id": 18,
+    "name": "Test Store Account 1749226143",
+    "locale": "en",
+    "domain": "http://localhost",
+    "support_email": "test@example.com",
+    "features": {
+    },
+    "custom_attributes": {
+      "store_id": "test_1749226143"
+    },
+    "limits": {
+    },
+    "status": "active"
+  },
+  {
+    "id": 19,
+    "name": "Test Account Backend",
+    "locale": "en",
+    "domain": null,
+    "support_email": "noreply@chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io",
+    "features": {
+    },
+    "custom_attributes": {
+    },
+    "limits": {
+    },
+    "status": "active"
+  },
+  {
+    "id": 20,
+    "name": "Test Account via Backend",
+    "locale": "en",
+    "domain": null,
+    "support_email": "noreply@chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io",
+    "features": {
+    },
+    "custom_attributes": {
+    },
+    "limits": {
+    },
+    "status": "active"
+  },
+  {
+    "id": 21,
+    "name": "Test Account for Permissions",
+    "locale": "en",
+    "domain": null,
+    "support_email": "noreply@chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io",
+    "features": {
+    },
+    "custom_attributes": {
+    },
+    "limits": {
+    },
+    "status": "active"
+  },
+  {
+    "id": 22,
+    "name": "VoiceLinkAI",
+    "locale": "en",
+    "domain": "http://localhost",
+    "support_email": "hello@example.com",
+    "features": {
+    },
+    "custom_attributes": {
+      "store_id": 1
+    },
+    "limits": {
+    },
+    "status": "active"
+  },
+  {
+    "id": 23,
+    "name": "Test Store 1713380400",
+    "locale": "en",
+    "domain": "http://localhost",
+    "support_email": "test-store-1713380400@example.com",
+    "features": {
+    },
+    "custom_attributes": {
+      "store_id": 1
+    },
+    "limits": {
+    },
+    "status": "active"
+  },
+  {
+    "id": 24,
+    "name": "Test Store 1713380400",
+    "locale": "en",
+    "domain": "http://localhost",
+    "support_email": "test-store-1713380400@example.com",
+    "features": {
+    },
+    "custom_attributes": {
+      "store_id": 1
+    },
+    "limits": {
+    },
+    "status": "active"
+  },
+  {
+    "id": 25,
+    "name": "Test Store 1713380400",
+    "locale": "en",
+    "domain": "http://localhost",
+    "support_email": "test-store-1713380400@example.com",
+    "features": {
+    },
+    "custom_attributes": {
+      "store_id": 1
+    },
+    "limits": {
+    },
+    "status": "active"
+  },
+  {
+    "id": 26,
+    "name": "Etha Lueilwitz DDS",
+    "locale": "en",
+    "domain": "http://localhost",
+    "support_email": "lorna90@example.org",
+    "features": {
+    },
+    "custom_attributes": {
+      "store_id": 1
+    },
+    "limits": {
+    },
+    "status": "active"
+  },
+  {
+    "id": 27,
+    "name": "Etha Lueilwitz DDS",
+    "locale": "en",
+    "domain": "http://localhost",
+    "support_email": "lorna90@example.org",
+    "features": {
+    },
+    "custom_attributes": {
+      "store_id": 1
+    },
+    "limits": {
+    },
+    "status": "active"
+  },
+  {
+    "id": 28,
+    "name": "Jamar Steuber",
+    "locale": "en",
+    "domain": "http://localhost",
+    "support_email": "mertie56@example.net",
+    "features": {
+    },
+    "custom_attributes": {
+      "store_id": 2
+    },
+    "limits": {
+    },
+    "status": "active"
+  },
+  {
+    "id": 29,
+    "name": "Jamar Steuber",
+    "locale": "en",
+    "domain": "http://localhost",
+    "support_email": "mertie56@example.net",
+    "features": {
+    },
+    "custom_attributes": {
+      "store_id": 2
+    },
+    "limits": {
+    },
+    "status": "active"
+  },
+  {
+    "id": 30,
+    "name": "Josefina Koss III",
+    "locale": "en",
+    "domain": "http://localhost",
+    "support_email": "htromp@example.com",
+    "features": {
+    },
+    "custom_attributes": {
+      "store_id": 1
+    },
+    "limits": {
+    },
+    "status": "active"
+  },
+  {
+    "id": 31,
+    "name": "Josefina Koss III",
+    "locale": "en",
+    "domain": "http://localhost",
+    "support_email": "htromp@example.com",
+    "features": {
+    },
+    "custom_attributes": {
+      "store_id": 1
+    },
+    "limits": {
+    },
+    "status": "active"
+  },
+  {
+    "id": 32,
+    "name": "Ms. Anne Skiles I",
+    "locale": "en",
+    "domain": "http://localhost",
+    "support_email": "owitting@example.com",
+    "features": {
+    },
+    "custom_attributes": {
+      "store_id": 2
+    },
+    "limits": {
+    },
+    "status": "active"
+  },
+  {
+    "id": 33,
+    "name": "Ms. Anne Skiles I",
+    "locale": "en",
+    "domain": "http://localhost",
+    "support_email": "owitting@example.com",
+    "features": {
+    },
+    "custom_attributes": {
+      "store_id": 2
+    },
+    "limits": {
+    },
+    "status": "active"
+  }
+]

@@ -1,0 +1,65 @@
+# Custom Code .gitignore
+# Created: 2025-06-10 08:45:00 PDT
+
+# Sensitive configuration files
+config/environments/production.yml
+config/environments/*.secret.yml
+config/integrations/*_production.yml
+
+# API tokens and credentials
+*.token
+*.key
+*.secret
+credentials.*
+
+# Log files
+logs/
+*.log
+
+# Backup files (these can be large)
+backup/*/
+*.backup
+*.bck
+
+# Temporary files
+tmp/
+*.tmp
+*.temp
+
+# Environment-specific configs
+.env.local
+.env.production
+.env.staging
+
+# Database dumps
+*.sql
+*.dump
+
+# Cache files
+cache/
+*.cache
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Ruby specific
+*.gem
+.bundle/
+vendor/bundle/
+
+# Test files (if you add tests to custom code)
+coverage/
+test/tmp/
+spec/tmp/
+
+# Documentation build files
+documentation/build/
+docs/build/ 

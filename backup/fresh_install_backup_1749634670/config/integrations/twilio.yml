@@ -1,0 +1,46 @@
+# Custom Twilio Configuration
+# Created: 2025-06-10 08:37:00 PDT
+# Purpose: Extended Twilio configuration that won't be overwritten during Chatwoot updates
+
+# Production Environment Settings
+production:
+  # VoiceLinkAI Production Settings
+  voicelinkai:
+    account_sid: "<%= ENV['TWILIO_ACCOUNT_SID'] %>"
+    auth_token: "<%= ENV['TWILIO_AUTH_TOKEN'] %>"
+    phone_number: "+19795412927"
+    webhook_base_url: "https://voicelinkai.com"
+    
+    # Custom webhook endpoints
+    webhooks:
+      sms_callback: "/twilio/callback"
+      status_callback: "/twilio/status"
+      fallback: "/twilio/fallback"
+    
+    # Custom retry and timeout settings
+    retry_settings:
+      max_retries: 3
+      timeout_seconds: 30
+      backoff_factor: 2
+    
+    # Message handling
+    message_settings:
+      max_message_length: 1600
+      auto_split: true
+      delivery_receipts: true
+
+# Test Environment Settings  
+test:
+  voicelinkai:
+    account_sid: "<%= ENV['TWILIO_TEST_ACCOUNT_SID'] %>"
+    auth_token: "<%= ENV['TWILIO_TEST_AUTH_TOKEN'] %>"
+    phone_number: "+15005550006"  # Twilio test number
+    webhook_base_url: "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+
+# Development Environment Settings
+development:
+  voicelinkai:
+    account_sid: "<%= ENV['TWILIO_DEV_ACCOUNT_SID'] %>"
+    auth_token: "<%= ENV['TWILIO_DEV_AUTH_TOKEN'] %>"
+    phone_number: "+15005550006"
+    webhook_base_url: "http://localhost:3000" 

@@ -1,0 +1,25 @@
+{
+  "$schema": "https://www.krakend.io/schema/v2.7/krakend.json",
+  "version": 3,
+  "name": "VoiceLink AI Gateway - Minimal",
+  "timeout": "3000ms",
+  "cache_ttl": "300s",
+  "output_encoding": "json",
+  "port": 8080,
+  "endpoints": [
+    {
+      "endpoint": "/__health",
+      "method": "GET",
+      "output_encoding": "json",
+      "backend": [
+        {
+          "url_pattern": "/get",
+          "encoding": "json",
+          "method": "GET",
+          "host": ["https://httpbin.org"],
+          "disable_host_sanitize": false
+        }
+      ]
+    }
+  ]
+} 

@@ -1,0 +1,13 @@
+{
+  "timestamp": 1749805241,
+  "date": "20250613_020041",
+  "database": "chatwoot_production",
+  "server": "chatwoot-db-fresh",
+  "resource_group": "SM-Test",
+  "backup_type": "azure_flexible_server_backup",
+  "created_by": "azure_cli_backup_script_final",
+  "reason": "Manual backup requested by user",
+  "status": "success",
+  "duration_seconds": 3.03,
+  "azure_backup_name": "manual-backup-20250613_020041"
+}

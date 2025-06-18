@@ -94,3 +94,5 @@ yarn-debug.log*
 
 # Claude.ai config file
 CLAUDE.md
+# SpecStory explanation file
+.specstory/.what-is-this.md

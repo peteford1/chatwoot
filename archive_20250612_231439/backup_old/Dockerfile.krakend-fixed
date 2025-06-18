@@ -1,0 +1,24 @@
+# Fixed KrakenD Configuration Dockerfile
+# Date: June 12, 2025
+# Status: Ready for deployment ✅
+
+FROM krakend:latest
+
+# Copy the corrected configuration
+COPY krakend.json /etc/krakend/krakend.json
+
+# Copy Lua scripts (they work correctly and provide value)
+COPY *.lua /etc/krakend/
+
+# Set proper permissions
+RUN chmod 644 /etc/krakend/krakend.json /etc/krakend/*.lua
+
+# Health check to verify KrakenD starts correctly
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:8080/__health || exit 1
+
+# Expose port
+EXPOSE 8080
+
+# Use the default KrakenD entrypoint
+CMD ["krakend", "run", "-c", "/etc/krakend/krakend.json"] 

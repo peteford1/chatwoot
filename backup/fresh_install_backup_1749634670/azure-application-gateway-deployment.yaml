@@ -1,0 +1,108 @@
+apiVersion: '2023-05-01'
+location: eastus
+name: voicelinkai-gateway-appgw
+type: Microsoft.Network/applicationGateways
+properties:
+  sku:
+    name: Standard_v2
+    tier: Standard_v2
+    capacity: 1
+  gatewayIPConfigurations:
+  - name: gateway-ip-config
+    properties:
+      subnet:
+        id: /subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.Network/virtualNetworks/voicelinkai-vnet/subnets/gateway-subnet
+  frontendIPConfigurations:
+  - name: frontend-ip-config
+    properties:
+      publicIPAddress:
+        id: /subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.Network/publicIPAddresses/voicelinkai-gateway-ip
+  frontendPorts:
+  - name: frontend-port-80
+    properties:
+      port: 80
+  - name: frontend-port-443
+    properties:
+      port: 443
+  backendAddressPools:
+  - name: backend-pool
+    properties:
+      backendAddresses:
+      - fqdn: voicelinkai-gateway.eastus.azurecontainer.io
+  backendHttpSettingsCollection:
+  - name: backend-http-settings
+    properties:
+      port: 8080
+      protocol: Http
+      cookieBasedAffinity: Disabled
+      requestTimeout: 30
+      connectionDraining:
+        enabled: true
+        drainTimeoutInSec: 60
+      probe:
+        id: /subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.Network/applicationGateways/voicelinkai-gateway-appgw/probes/health-probe
+  httpListeners:
+  - name: http-listener
+    properties:
+      frontendIPConfiguration:
+        id: /subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.Network/applicationGateways/voicelinkai-gateway-appgw/frontendIPConfigurations/frontend-ip-config
+      frontendPort:
+        id: /subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.Network/applicationGateways/voicelinkai-gateway-appgw/frontendPorts/frontend-port-80
+      protocol: Http
+  - name: https-listener
+    properties:
+      frontendIPConfiguration:
+        id: /subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.Network/applicationGateways/voicelinkai-gateway-appgw/frontendIPConfigurations/frontend-ip-config
+      frontendPort:
+        id: /subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.Network/applicationGateways/voicelinkai-gateway-appgw/frontendPorts/frontend-port-443
+      protocol: Https
+      sslCertificate:
+        id: /subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.Network/applicationGateways/voicelinkai-gateway-appgw/sslCertificates/ssl-certificate
+  requestRoutingRules:
+  - name: http-to-https-redirect
+    properties:
+      ruleType: Basic
+      priority: 100
+      httpListener:
+        id: /subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.Network/applicationGateways/voicelinkai-gateway-appgw/httpListeners/http-listener
+      redirectConfiguration:
+        id: /subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.Network/applicationGateways/voicelinkai-gateway-appgw/redirectConfigurations/http-to-https-redirect
+  - name: https-routing-rule
+    properties:
+      ruleType: Basic
+      priority: 200
+      httpListener:
+        id: /subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.Network/applicationGateways/voicelinkai-gateway-appgw/httpListeners/https-listener
+      backendAddressPool:
+        id: /subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.Network/applicationGateways/voicelinkai-gateway-appgw/backendAddressPools/backend-pool
+      backendHttpSettings:
+        id: /subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.Network/applicationGateways/voicelinkai-gateway-appgw/backendHttpSettingsCollection/backend-http-settings
+  probes:
+  - name: health-probe
+    properties:
+      protocol: Http
+      path: /__health
+      interval: 30
+      timeout: 30
+      unhealthyThreshold: 3
+      pickHostNameFromBackendHttpSettings: true
+      minServers: 0
+      match:
+        statusCodes:
+        - '200-399'
+  redirectConfigurations:
+  - name: http-to-https-redirect
+    properties:
+      redirectType: Permanent
+      targetListener:
+        id: /subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.Network/applicationGateways/voicelinkai-gateway-appgw/httpListeners/https-listener
+      includePath: true
+      includeQueryString: true
+  sslCertificates:
+  - name: ssl-certificate
+    properties:
+      data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0=
+      password: ""
+tags:
+  purpose: "VoiceLink AI Gateway SSL Termination"
+  environment: "production" 

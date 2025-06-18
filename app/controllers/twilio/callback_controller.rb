@@ -1,4 +1,7 @@
 class Twilio::CallbackController < ApplicationController
+  # 2025-06-04: Added webhook security to prevent direct access - force requests through KrakenD gateway
+  include WebhookSecurity
+  
   def create
     Webhooks::TwilioEventsJob.perform_later(permitted_params.to_unsafe_hash)
 

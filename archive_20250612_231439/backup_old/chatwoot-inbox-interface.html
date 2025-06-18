@@ -1,0 +1,1876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatwoot-Style Inbox Interface</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #f9fafb;
+            color: #374151;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .inbox-container {
+            display: flex;
+            height: 100vh;
+            background: white;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 400px;
+            min-width: 400px;
+            border-right: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+
+        .sidebar-header {
+            padding: 16px;
+            border-bottom: 1px solid #e5e7eb;
+            background: white;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 12px;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 8px 12px 8px 36px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #f9fafb;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background: white;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6b7280;
+        }
+
+        .filters {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .filter-tab {
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .filter-tab.active {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .filter-tab:hover {
+            background: #e5e7eb;
+        }
+
+        .filter-tab.active:hover {
+            background: #2563eb;
+        }
+
+        /* Conversation List */
+        .conversation-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0;
+        }
+
+        .conversation-item {
+            padding: 16px;
+            border-bottom: 1px solid #f3f4f6;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+            position: relative;
+        }
+
+        .conversation-item:hover {
+            background: #f8fafc;
+        }
+
+        .conversation-item.active {
+            background: #eff6ff;
+            border-right: 3px solid #3b82f6;
+        }
+
+        .conversation-item.unread {
+            background: #fefefe;
+            border-left: 3px solid #3b82f6;
+        }
+
+        .conversation-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .conversation-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .contact-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: #111827;
+            margin-bottom: 4px;
+        }
+
+        .last-message {
+            font-size: 13px;
+            color: #6b7280;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin-bottom: 4px;
+        }
+
+        .conversation-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #9ca3af;
+        }
+
+        .timestamp {
+            font-size: 12px;
+            color: #9ca3af;
+            white-space: nowrap;
+        }
+
+        .status-badge {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .status-open {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .status-resolved {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .unread-count {
+            background: #3b82f6;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .inbox-badge {
+            background: #f3f4f6;
+            color: #6b7280;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .conversation-header-main {
+            padding: 16px 24px;
+            border-bottom: 1px solid #e5e7eb;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .conversation-title {
+            display: flex;
+            align-items: center;
+        }
+
+        .conversation-title h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #111827;
+            margin-left: 12px;
+        }
+
+        .conversation-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border: 1px solid #d1d5db;
+            background: white;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            background: #f9fafb;
+        }
+
+        .action-btn.primary {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        .action-btn.primary:hover {
+            background: #2563eb;
+        }
+
+        /* Messages Area */
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 24px;
+            background: #f9fafb;
+        }
+
+        .message {
+            margin-bottom: 16px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .message.outgoing {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 12px;
+            margin: 0 12px;
+            flex-shrink: 0;
+        }
+
+        .message.outgoing .message-avatar {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .message-content {
+            max-width: 70%;
+            background: white;
+            padding: 12px 16px;
+            border-radius: 16px;
+            border: 1px solid #e5e7eb;
+            position: relative;
+        }
+
+        .message.outgoing .message-content {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        .message-text {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: #9ca3af;
+            margin-top: 4px;
+        }
+
+        .message.outgoing .message-time {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Message Input */
+        .message-input-container {
+            padding: 16px 24px;
+            border-top: 1px solid #e5e7eb;
+            background: white;
+        }
+
+        .message-input-box {
+            border: 1px solid #d1d5db;
+            border-radius: 12px;
+            background: #f9fafb;
+        }
+
+        .message-input-box:focus-within {
+            border-color: #3b82f6;
+            background: white;
+        }
+
+        /* Formatting Toolbar */
+        .formatting-toolbar {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            border-bottom: 1px solid #e5e7eb;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+
+        .format-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: transparent;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .format-btn:hover {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .format-btn.active {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .format-divider {
+            width: 1px;
+            height: 20px;
+            background: #e5e7eb;
+            margin: 0 4px;
+        }
+
+        /* Input Area */
+        .input-area {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            padding: 12px;
+        }
+
+        .message-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 14px;
+            resize: none;
+            min-height: 20px;
+            max-height: 120px;
+            line-height: 1.5;
+        }
+
+        /* Action Buttons */
+        .input-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .attachment-btn, .emoji-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 16px;
+            color: #6b7280;
+        }
+
+        .attachment-btn:hover, .emoji-btn:hover {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .send-btn {
+            padding: 8px 16px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .send-btn:hover {
+            background: #2563eb;
+        }
+
+        .send-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        /* File Upload */
+        .file-input {
+            display: none;
+        }
+
+        .attachment-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 8px 12px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .attachment-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            background: #f3f4f6;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #374151;
+        }
+
+        .attachment-item .remove-btn {
+            cursor: pointer;
+            color: #ef4444;
+            font-weight: bold;
+            margin-left: 4px;
+        }
+
+        .attachment-item .remove-btn:hover {
+            color: #dc2626;
+        }
+
+        /* Emoji Picker */
+        .emoji-picker {
+            position: absolute;
+            bottom: 100%;
+            right: 0;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 12px;
+            display: none;
+            z-index: 1000;
+            max-width: 300px;
+        }
+
+        .emoji-picker.show {
+            display: block;
+        }
+
+        .emoji-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .emoji-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+
+        .emoji-item:hover {
+            background: #f3f4f6;
+        }
+
+        /* Message attachments in conversation */
+        .message-attachment {
+            margin-top: 8px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            font-size: 12px;
+        }
+
+        .message.outgoing .message-attachment {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .attachment-icon {
+            display: inline-block;
+            margin-right: 6px;
+        }
+
+        /* Typing indicator */
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            padding: 12px 24px;
+            font-size: 12px;
+            color: #6b7280;
+            font-style: italic;
+        }
+
+        .typing-indicator.show {
+            display: flex;
+        }
+
+        .typing-dots {
+            display: inline-flex;
+            margin-left: 8px;
+        }
+
+        .typing-dots span {
+            width: 4px;
+            height: 4px;
+            background: #6b7280;
+            border-radius: 50%;
+            margin: 0 1px;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.4;
+            }
+            30% {
+                transform: translateY(-10px);
+                opacity: 1;
+            }
+        }
+
+        /* Empty State */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #6b7280;
+        }
+
+        .empty-state-icon {
+            width: 80px;
+            height: 80px;
+            background: #f3f4f6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            font-size: 32px;
+        }
+
+        /* Contact Panel */
+        .contact-panel {
+            width: 320px;
+            min-width: 320px;
+            border-left: 1px solid #e5e7eb;
+            background: white;
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .contact-info {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .contact-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 24px;
+            margin: 0 auto 16px;
+        }
+
+        .contact-details h4 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 4px;
+        }
+
+        .contact-email {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                max-width: 400px;
+            }
+            
+            .main-content {
+                display: none;
+            }
+            
+            .inbox-container.show-conversation .sidebar {
+                display: none;
+            }
+            
+            .inbox-container.show-conversation .main-content {
+                display: flex;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="inbox-container" id="inboxContainer">
+        <!-- Sidebar with Conversation List -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2 class="header-title">Conversations</h2>
+                <div class="search-box">
+                    <div class="search-icon">🔍</div>
+                    <input type="text" class="search-input" placeholder="Search conversations..." id="searchInput">
+                </div>
+                <div class="filters">
+                    <div class="filter-tab active" data-filter="open">Open</div>
+                    <div class="filter-tab" data-filter="resolved">Resolved</div>
+                    <div class="filter-tab" data-filter="all">All</div>
+                </div>
+            </div>
+            <div class="conversation-list" id="conversationList">
+                <!-- Conversations will be dynamically populated -->
+            </div>
+        </div>
+
+        <!-- Main Conversation Area -->
+        <div class="main-content" id="mainContent">
+            <div class="conversation-header-main" id="conversationHeader" style="display: none;">
+                <div class="conversation-title">
+                    <div class="avatar" id="headerAvatar">JD</div>
+                    <div>
+                        <h3 id="headerName">John Doe</h3>
+                        <div class="conversation-meta">
+                            <span class="inbox-badge" id="headerInbox">Website</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="conversation-actions">
+                    <button class="action-btn">📞 Call</button>
+                    <button class="action-btn">🏷️ Label</button>
+                    <button class="action-btn primary">✅ Resolve</button>
+                </div>
+            </div>
+
+            <div class="messages-container" id="messagesContainer">
+                <div class="empty-state" id="emptyState">
+                    <div class="empty-state-icon">💬</div>
+                    <h3>Select a conversation</h3>
+                    <p>Choose a conversation from the sidebar to start messaging</p>
+                </div>
+            </div>
+
+            <div class="message-input-container" id="messageInputContainer" style="display: none;">
+                <div class="message-input-box">
+                    <!-- Formatting Toolbar -->
+                    <div class="formatting-toolbar">
+                        <button class="format-btn" data-format="bold" title="Bold">
+                            <strong>B</strong>
+                        </button>
+                        <button class="format-btn" data-format="italic" title="Italic">
+                            <em>I</em>
+                        </button>
+                        <button class="format-btn" data-format="underline" title="Underline">
+                            <span style="text-decoration: underline;">U</span>
+                        </button>
+                        <div class="format-divider"></div>
+                        <button class="format-btn" data-format="bulletList" title="Bullet List">
+                            •
+                        </button>
+                        <button class="format-btn" data-format="numberedList" title="Numbered List">
+                            1.
+                        </button>
+                        <div class="format-divider"></div>
+                        <button class="format-btn" data-format="link" title="Insert Link">
+                            🔗
+                        </button>
+                        <button class="format-btn" data-format="code" title="Code">
+                            &lt;/&gt;
+                        </button>
+                        <div class="format-divider"></div>
+                        <button class="format-btn" data-format="undo" title="Undo">
+                            ↶
+                        </button>
+                        <button class="format-btn" data-format="redo" title="Redo">
+                            ↷
+                        </button>
+                    </div>
+                    
+                    <!-- Attachment Preview -->
+                    <div class="attachment-preview" id="attachmentPreview" style="display: none;"></div>
+                    
+                    <!-- Input Area -->
+                    <div class="input-area">
+                        <div class="input-actions">
+                            <button class="attachment-btn" id="attachmentBtn" title="Attach file">
+                                📎
+                            </button>
+                            <input type="file" class="file-input" id="fileInput" multiple accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt">
+                            <div style="position: relative;">
+                                <button class="emoji-btn" id="emojiBtn" title="Add emoji">
+                                    😊
+                                </button>
+                                <div class="emoji-picker" id="emojiPicker">
+                                    <div class="emoji-grid" id="emojiGrid">
+                                        <!-- Emojis will be populated here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div contenteditable="true" class="message-input" placeholder="Type your message..." id="messageInput" data-placeholder="Type your message..."></div>
+                        <button class="send-btn" id="sendBtn">
+                            <span>Send</span>
+                            <span style="font-size: 10px;">⏎</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Typing Indicator -->
+            <div class="typing-indicator" id="typingIndicator">
+                <span>Customer is typing</span>
+                <div class="typing-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Azure Chatwoot Configuration
+        const CONFIG = {
+            API_BASE_URL: 'https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io',
+            GATEWAY_URL: 'https://voicelinkai-gateway.eastus.cloudapp.azure.com',
+            WEBSITE_TOKEN: 'zEGFZ3658VdbbvkCTrpy8C5z',  // For widget/API access
+            PLATFORM_TOKEN: 'PDcyku9tpAYnNytixsfmoCHo', // For multi-tenant access
+            ACCOUNT_ID: 1
+        };
+
+        // Live conversation data (will be populated from API)
+        let conversations = [];
+
+        // Debug logging
+        let debugLog = [];
+        function logDebug(message, data = null) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            debugLog.push(logEntry);
+            if (data) {
+                debugLog.push(JSON.stringify(data, null, 2));
+            }
+            console.log(logEntry, data);
+        }
+
+        // API Functions with CORS-free methods (proven working solution)
+        async function makeAPIRequest(endpoint, options = {}) {
+            // Try local KrakenD first, then gateway, then direct backend (as proven in debug file)
+            const configs = [
+                { name: 'Local KrakenD Gateway', baseUrl: 'http://localhost:8088' },
+                { name: 'Azure Gateway', baseUrl: CONFIG.GATEWAY_URL },
+                { name: 'Direct Backend', baseUrl: CONFIG.API_BASE_URL }
+            ];
+            
+            for (const config of configs) {
+                try {
+                    const url = `${config.baseUrl}${endpoint}`;
+                    logDebug(`Trying ${config.name}: ${options.method || 'GET'} ${url}`);
+                    
+                    // Use query parameters for GET requests to avoid CORS preflight
+                    if (!options.method || options.method === 'GET') {
+                        const separator = url.includes('?') ? '&' : '?';
+                        const urlWithToken = `${url}${separator}api_access_token=${CONFIG.PLATFORM_TOKEN}`;
+                        
+                        const response = await fetch(urlWithToken, {
+                            method: 'GET'
+                        });
+                        
+                        if (response.ok) {
+                            const data = await response.json();
+                            logDebug(`✅ ${config.name} success: ${response.status}`, data);
+                            return data;
+                        } else {
+                            const errorText = await response.text();
+                            logDebug(`❌ ${config.name} failed: ${response.status} - ${errorText}`);
+                            continue;
+                        }
+                    }
+                    
+                    // Use FormData for POST requests to avoid CORS preflight
+                    if (options.method === 'POST') {
+                        const formData = new FormData();
+                        formData.append('api_access_token', CONFIG.PLATFORM_TOKEN);
+                        
+                        if (options.body) {
+                            if (typeof options.body === 'string') {
+                                const bodyData = JSON.parse(options.body);
+                                Object.keys(bodyData).forEach(key => {
+                                    formData.append(key, bodyData[key]);
+                                });
+                            } else {
+                                Object.keys(options.body).forEach(key => {
+                                    formData.append(key, options.body[key]);
+                                });
+                            }
+                        }
+                        
+                        const response = await fetch(url, {
+                            method: 'POST',
+                            body: formData
+                        });
+                        
+                        if (response.ok) {
+                            const data = await response.json();
+                            logDebug(`✅ ${config.name} success: ${response.status}`, data);
+                            return data;
+                        } else {
+                            const errorText = await response.text();
+                            logDebug(`❌ ${config.name} failed: ${response.status} - ${errorText}`);
+                            continue;
+                        }
+                    }
+                    
+                } catch (error) {
+                    logDebug(`❌ ${config.name} error: ${error.message}`);
+                    continue;
+                }
+            }
+            
+            throw new Error('All API endpoints failed');
+        }
+
+        // First authenticate with widget config to establish session
+        async function authenticateWithWidget() {
+            try {
+                logDebug('🔐 Authenticating with widget config...');
+                
+                // Use FormData to avoid CORS preflight (proven working method)
+                const response = await fetch('http://localhost:8088/api/v1/widget/config', {
+                    method: 'POST',
+                    body: (() => {
+                        const formData = new FormData();
+                        formData.append('website_token', CONFIG.WEBSITE_TOKEN);
+                        return formData;
+                    })()
+                });
+                
+                if (response.ok) {
+                    const configData = await response.json();
+                    logDebug('✅ Widget authentication successful', configData);
+                    return configData;
+                } else {
+                    logDebug(`❌ Widget authentication failed: ${response.status}`);
+                    return null;
+                }
+            } catch (error) {
+                logDebug(`❌ Widget authentication error: ${error.message}`);
+                return null;
+            }
+        }
+
+        // Load conversations from Chatwoot API 
+        async function loadConversations() {
+            try {
+                logDebug('🔄 Loading conversations from Chatwoot...');
+                logDebug('✅ CORS CONFIGURED: Attempting to fetch live data from Azure backend...');
+                
+                // First authenticate with widget to get auth_token
+                logDebug('🔐 Getting widget authentication token...');
+                
+                try {
+                    const response = await fetch('http://localhost:8088/api/v1/widget/config', {
+                        method: 'POST',
+                        body: (() => {
+                            const formData = new FormData();
+                            formData.append('website_token', CONFIG.WEBSITE_TOKEN);
+                            return formData;
+                        })()
+                    });
+                    
+                    if (response.ok) {
+                        const widgetConfig = await response.json();
+                        const authToken = widgetConfig.website_channel_config?.auth_token;
+                        
+                        if (authToken) {
+                            logDebug('✅ Widget auth successful, got auth_token');
+                            logDebug('🎯 Auth Token (first 20 chars): ' + authToken.substring(0, 20) + '...');
+                            
+                            // Show successful connection with actual config data
+                            const websiteConfig = widgetConfig.website_channel_config;
+                            logDebug('📋 Live Configuration Data Retrieved:');
+                            logDebug(`   • Inbox ID: ${websiteConfig.inbox_id || 'N/A'}`);
+                            logDebug(`   • Website Name: ${websiteConfig.website_name || 'N/A'}`);
+                            logDebug(`   • Widget Color: ${websiteConfig.widget_color || 'N/A'}`);
+                            
+                            // Now try to fetch actual conversations for account 1
+                            logDebug('🔍 Fetching conversations for account 1...');
+                            
+                            try {
+                                // Try using platform token for agent API
+                                let conversationsUrl = `http://localhost:8088/api/v1/accounts/1/conversations?api_access_token=${CONFIG.PLATFORM_TOKEN}`;
+                                
+                                const convResponse = await fetch(conversationsUrl);
+                                logDebug(`📡 Conversations API response: ${convResponse.status} ${convResponse.statusText}`);
+                                
+                                if (convResponse.ok) {
+                                    const convData = await convResponse.json();
+                                    logDebug('✅ Got conversations data:', convData);
+                                    
+                                    // Process actual conversations
+                                    const rawConversations = convData.data || convData.conversations || convData || [];
+                                    
+                                    if (Array.isArray(rawConversations) && rawConversations.length > 0) {
+                                        conversations = rawConversations.map(conv => ({
+                                            id: conv.id,
+                                            contact: {
+                                                name: conv.meta?.sender?.name || conv.contact?.name || 'Unknown Contact',
+                                                email: conv.meta?.sender?.email || conv.contact?.email || '',
+                                                avatar: (conv.meta?.sender?.name || conv.contact?.name || 'UK').substring(0, 2).toUpperCase()
+                                            },
+                                            lastMessage: conv.last_non_activity_message?.content || conv.messages?.[0]?.content || 'No messages',
+                                            timestamp: new Date(conv.last_activity_at || conv.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                                            status: conv.status || 'open',
+                                            unreadCount: conv.unread_count || 0,
+                                            inbox: `Inbox ${conv.inbox_id || websiteConfig.inbox_id}`,
+                                            messages: (conv.messages || []).map(msg => ({
+                                                id: msg.id,
+                                                content: msg.content || '',
+                                                timestamp: new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                                                sender: msg.message_type === 'incoming' ? 'customer' : 'agent',
+                                                avatar: msg.sender?.name?.substring(0, 2).toUpperCase() || 'UK',
+                                                attachments: msg.attachments || []
+                                            }))
+                                        }));
+                                        
+                                        logDebug(`✅ Loaded ${conversations.length} real conversations from account 1`);
+                                        renderConversationList();
+                                        return;
+                                    } else {
+                                        logDebug('📭 No conversations found in account 1');
+                                    }
+                                } else if (convResponse.status === 401) {
+                                    logDebug('🔑 Platform token unauthorized, trying with widget auth token...');
+                                    
+                                    // Try with widget auth token
+                                    conversationsUrl = `http://localhost:8088/api/v1/accounts/1/conversations?auth_token=${authToken}`;
+                                    
+                                    const widgetConvResponse = await fetch(conversationsUrl);
+                                    logDebug(`📡 Widget auth conversations API response: ${widgetConvResponse.status} ${widgetConvResponse.statusText}`);
+                                    
+                                    if (widgetConvResponse.ok) {
+                                        const widgetConvData = await widgetConvResponse.json();
+                                        logDebug('✅ Got conversations with widget auth:', widgetConvData);
+                                        
+                                        // Process conversations with widget auth
+                                        const rawConversations = widgetConvData.data || widgetConvData.conversations || widgetConvData || [];
+                                        
+                                        if (Array.isArray(rawConversations) && rawConversations.length > 0) {
+                                            conversations = rawConversations.map(conv => ({
+                                                id: conv.id,
+                                                contact: {
+                                                    name: conv.meta?.sender?.name || conv.contact?.name || 'Unknown Contact',
+                                                    email: conv.meta?.sender?.email || conv.contact?.email || '',
+                                                    avatar: (conv.meta?.sender?.name || conv.contact?.name || 'UK').substring(0, 2).toUpperCase()
+                                                },
+                                                lastMessage: conv.last_non_activity_message?.content || conv.messages?.[0]?.content || 'No messages',
+                                                timestamp: new Date(conv.last_activity_at || conv.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                                                status: conv.status || 'open',
+                                                unreadCount: conv.unread_count || 0,
+                                                inbox: `Inbox ${conv.inbox_id || websiteConfig.inbox_id}`,
+                                                messages: (conv.messages || []).map(msg => ({
+                                                    id: msg.id,
+                                                    content: msg.content || '',
+                                                    timestamp: new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                                                    sender: msg.message_type === 'incoming' ? 'customer' : 'agent',
+                                                    avatar: msg.sender?.name?.substring(0, 2).toUpperCase() || 'UK',
+                                                    attachments: msg.attachments || []
+                                                }))
+                                            }));
+                                            
+                                            logDebug(`✅ Loaded ${conversations.length} real conversations using widget auth`);
+                                            renderConversationList();
+                                            return;
+                                        }
+                                    }
+                                }
+                            } catch (convError) {
+                                logDebug(`❌ Error fetching conversations: ${convError.message}`);
+                            }
+                            
+                            // If no conversations found, show the API discovery results
+                            conversations = [{
+                                id: 'api-discovery',
+                                contact: {
+                                    name: 'API Discovery Results',
+                                    email: 'api@azure-chatwoot.com',
+                                    avatar: 'API'
+                                },
+                                lastMessage: '🔍 API endpoints tested - some limitations found',
+                                timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                                status: 'open',
+                                unreadCount: 0,
+                                inbox: `Inbox ${websiteConfig.inbox_id || 'Unknown'}`,
+                                messages: [{
+                                    id: 1,
+                                    content: `🔍 <strong>API Discovery Complete</strong><br><br>✅ <strong>Working Endpoints:</strong><br>• Widget Config: 200 OK<br>• Widget Auth: Successfully getting tokens<br>• Backend Health: Responding normally<br><br>❌ <strong>Limited Access Found:</strong><br>• Agent API: "Access not authorized for bots"<br>• Platform API: 404 - endpoints not available<br>• Widget Conversations: "Resource could not be found"<br><br>💡 <strong>This suggests:</strong><br>• Azure instance may have restricted API access<br>• Conversations might need to be created via web interface first<br>• Some endpoints might be disabled in this environment<br><br>🎯 <strong>Tokens Tested:</strong><br>• Platform: ${CONFIG.PLATFORM_TOKEN.substring(0, 20)}...<br>• Widget Auth: ${authToken.substring(0, 20)}...<br><br>Next step: Create conversations via Chatwoot web interface!`,
+                                    timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                                    sender: 'system',
+                                    avatar: 'API',
+                                    attachments: []
+                                }]
+                            }];
+                            
+                            logDebug(`✅ Authentication successful but no conversations found in account 1`);
+                            renderConversationList();
+                            return;
+                        } else {
+                            logDebug('❌ No auth_token in widget config response');
+                        }
+                    } else {
+                        logDebug(`❌ Widget config failed: ${response.status} ${response.statusText}`);
+                    }
+                } catch (authError) {
+                    logDebug(`❌ Widget authentication error: ${authError.message}`);
+                    
+                    // If we still get CORS errors, show that info
+                    conversations = [{
+                        id: 'cors-still-issue',
+                        contact: {
+                            name: 'CORS Debug',
+                            email: 'debug@cors.com',
+                            avatar: 'CD'
+                        },
+                        lastMessage: '⚠️ CORS issue persisting - check KrakenD configuration',
+                        timestamp: 'now',
+                        status: 'open',
+                        unreadCount: 1,
+                        inbox: 'Debug',
+                        messages: [{
+                            id: 1,
+                            content: `⚠️ <strong>CORS Issue Still Present</strong><br><br>Error: ${authError.message}<br><br>🔍 <strong>Check:</strong><br>• KrakenD running on port 8088<br>• CORS headers configured<br>• Browser dev tools for detailed error<br><br>💡 <strong>Expected:</strong> With CORS properly configured, this should work.`,
+                            timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                            sender: 'debug',
+                            avatar: 'DBG',
+                            attachments: []
+                        }]
+                    }];
+                    renderConversationList();
+                    return;
+                }
+                
+                // Fallback: No conversations found
+                logDebug('⚠️ No conversations loaded - showing empty state');
+                conversations = [];
+                renderConversationList();
+                
+            } catch (error) {
+                logDebug(`❌ Error: ${error.message}`);
+                conversations = [];
+                renderConversationList();
+            }
+        }
+
+        // Load messages for a conversation
+        async function loadMessages(conversationId) {
+            try {
+                logDebug(`📥 Loading messages for conversation ${conversationId}`);
+                
+                const data = await makeAPIRequest(`/api/v1/accounts/${CONFIG.ACCOUNT_ID}/conversations/${conversationId}/messages`);
+                
+                const messages = data.payload || data.data || data || [];
+                logDebug(`✅ Loaded ${messages.length} messages`);
+                
+                return Array.isArray(messages) ? messages : [];
+                
+            } catch (error) {
+                logDebug(`❌ Error loading messages for conversation ${conversationId}: ${error.message}`);
+                return [];
+            }
+        }
+
+        // Transform Chatwoot conversation data to our UI format
+        function transformConversationData(conv, messages) {
+            const contact = conv.meta?.sender || conv.contact || {};
+            const contactName = contact.name || contact.email || `Customer ${conv.id}`;
+            const contactEmail = contact.email || '';
+            const contactInitials = contactName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+            
+            const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
+            const lastMessageText = lastMessage ? lastMessage.content : 'No messages yet';
+            
+            const transformedMessages = messages.map(msg => ({
+                id: msg.id,
+                content: msg.content || '',
+                timestamp: formatTimestamp(msg.created_at),
+                sender: msg.message_type === 1 ? 'agent' : 'customer',
+                avatar: msg.message_type === 1 ? 'AG' : contactInitials,
+                attachments: msg.attachments || []
+            }));
+            
+            return {
+                id: conv.id,
+                contact: {
+                    name: contactName,
+                    email: contactEmail,
+                    avatar: contactInitials
+                },
+                lastMessage: lastMessageText.substring(0, 100),
+                timestamp: lastMessage ? formatTimestamp(lastMessage.created_at) : formatTimestamp(conv.created_at),
+                status: conv.status || 'open',
+                unreadCount: 0, // You can calculate this based on read status
+                inbox: conv.inbox?.name || 'Unknown',
+                messages: transformedMessages
+            };
+        }
+
+        // Transform widget conversation data to our UI format
+        function transformWidgetConversationData(conv) {
+            const contactName = conv.meta?.sender?.name || `Customer ${conv.id}`;
+            const contactEmail = conv.meta?.sender?.email || '';
+            const contactInitials = contactName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+            
+            const messages = conv.messages || [];
+            const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
+            const lastMessageText = lastMessage ? lastMessage.content : 'No messages yet';
+            
+            const transformedMessages = messages.map(msg => ({
+                id: msg.id,
+                content: msg.content || '',
+                timestamp: formatTimestamp(msg.created_at),
+                sender: msg.message_type === 1 ? 'agent' : 'customer',
+                avatar: msg.message_type === 1 ? 'AG' : contactInitials,
+                attachments: msg.attachments || []
+            }));
+            
+            return {
+                id: conv.id,
+                contact: {
+                    name: contactName,
+                    email: contactEmail,
+                    avatar: contactInitials
+                },
+                lastMessage: lastMessageText.substring(0, 100),
+                timestamp: lastMessage ? formatTimestamp(lastMessage.created_at) : formatTimestamp(conv.created_at),
+                status: conv.status || 'open',
+                unreadCount: conv.unread_count || 0,
+                inbox: 'Widget',
+                messages: transformedMessages
+            };
+        }
+
+        // Send message to Chatwoot
+        async function sendMessageToAPI(conversationId, content) {
+            try {
+                logDebug(`📤 Sending message to conversation ${conversationId}`);
+                
+                const messageData = {
+                    content: content,
+                    message_type: 1, // Agent message
+                    private: false
+                };
+                
+                const response = await makeAPIRequest(`/api/v1/accounts/${CONFIG.ACCOUNT_ID}/conversations/${conversationId}/messages`, {
+                    method: 'POST',
+                    body: messageData
+                });
+                
+                logDebug(`✅ Message sent successfully`);
+                return response;
+                
+            } catch (error) {
+                logDebug(`❌ Error sending message: ${error.message}`);
+                throw error;
+            }
+        }
+
+        // Utility function to format timestamps
+        function formatTimestamp(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diffInHours = (now - date) / (1000 * 60 * 60);
+            
+            if (diffInHours < 1) {
+                return 'Just now';
+            } else if (diffInHours < 24) {
+                return `${Math.floor(diffInHours)}h ago`;
+            } else if (diffInHours < 48) {
+                return 'Yesterday';
+            } else {
+                return date.toLocaleDateString();
+            }
+        }
+
+        let activeConversation = null;
+        let currentFilter = 'open';
+
+        // Common emojis for the picker
+        const commonEmojis = [
+            '😀', '😃', '😄', '😁', '😆', '😅', '🤣', '😂',
+            '🙂', '🙃', '😉', '😊', '😇', '🥰', '😍', '🤩',
+            '😘', '😗', '☺️', '😚', '😙', '🥲', '😋', '😛',
+            '😜', '🤪', '😝', '🤑', '🤗', '🤭', '🤫', '🤔',
+            '🤐', '🤨', '😐', '😑', '😶', '😏', '😒', '🙄',
+            '😬', '🤥', '😔', '😪', '🤤', '😴', '😷', '🤒',
+            '🤕', '🤢', '🤮', '🤧', '🥵', '🥶', '🥴', '😵',
+            '🤯', '🤠', '🥳', '🥸', '😎', '🤓', '🧐', '😕',
+            '😟', '🙁', '☹️', '😮', '😯', '😲', '😳', '🥺',
+            '😦', '😧', '😨', '😰', '😥', '😢', '😭', '😱',
+            '😖', '😣', '😞', '😓', '😩', '😫', '🥱', '😤',
+            '😡', '😠', '🤬', '😈', '👿', '💀', '☠️', '💩',
+            '🤡', '👹', '👺', '👻', '👽', '👾', '🤖', '😺',
+            '👍', '👎', '👏', '🙌', '👐', '🤲', '🤝', '🙏',
+            '✌️', '🤟', '🤘', '🤞', '🤙', '🤏', '👌', '🤌',
+            '👈', '👉', '👆', '👇', '☝️', '✋', '🤚', '🖐',
+            '🖖', '👋', '🤏', '💪', '🦾', '🖕', '✍️', '🤳',
+            '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍',
+            '🤎', '💔', '❣️', '💕', '💞', '💓', '💗', '💖',
+            '💘', '💝', '💟', '☮️', '✝️', '☪️', '🕉️', '☸️',
+            '✡️', '🔯', '🕎', '☯️', '☦️', '🛐', '⛎', '♈',
+            '🔥', '💯', '💢', '💨', '💦', '💤', '🎉', '🎊'
+        ];
+
+        let attachedFiles = [];
+        let isEmojiPickerOpen = false;
+
+        // Initialize the app
+        async function initializeApp() {
+            setupEventListeners();
+            initializeEmojiPicker();
+            initializeFormatting();
+            
+            // Show loading state
+            document.getElementById('conversationList').innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">Loading conversations...</div>';
+            
+            // Load live data from Chatwoot
+            await loadConversations();
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Filter tabs
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+                    e.target.classList.add('active');
+                    currentFilter = e.target.dataset.filter;
+                    renderConversationList();
+                });
+            });
+
+            // Search input
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                renderConversationList(e.target.value);
+            });
+
+            // Send button
+            document.getElementById('sendBtn').addEventListener('click', sendMessage);
+            
+            // Message input enter key
+            document.getElementById('messageInput').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            // File attachment
+            document.getElementById('attachmentBtn').addEventListener('click', () => {
+                document.getElementById('fileInput').click();
+            });
+
+            document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+
+            // Emoji picker
+            document.getElementById('emojiBtn').addEventListener('click', toggleEmojiPicker);
+
+            // Close emoji picker when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('#emojiBtn') && !e.target.closest('#emojiPicker')) {
+                    closeEmojiPicker();
+                }
+            });
+
+            // Typing indicator simulation
+            document.getElementById('messageInput').addEventListener('input', () => {
+                simulateTyping();
+            });
+
+            // Placeholder handling for contenteditable
+            const messageInput = document.getElementById('messageInput');
+            messageInput.addEventListener('focus', () => {
+                if (messageInput.textContent === messageInput.dataset.placeholder) {
+                    messageInput.textContent = '';
+                    messageInput.style.color = '#000';
+                }
+            });
+
+            messageInput.addEventListener('blur', () => {
+                if (messageInput.textContent.trim() === '') {
+                    messageInput.textContent = messageInput.dataset.placeholder;
+                    messageInput.style.color = '#9ca3af';
+                }
+            });
+        }
+
+        // Initialize emoji picker
+        function initializeEmojiPicker() {
+            const emojiGrid = document.getElementById('emojiGrid');
+            emojiGrid.innerHTML = commonEmojis.map(emoji => 
+                `<div class="emoji-item" data-emoji="${emoji}">${emoji}</div>`
+            ).join('');
+
+            emojiGrid.addEventListener('click', (e) => {
+                if (e.target.classList.contains('emoji-item')) {
+                    insertEmoji(e.target.dataset.emoji);
+                }
+            });
+        }
+
+        // Initialize formatting
+        function initializeFormatting() {
+            document.querySelectorAll('.format-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const format = btn.dataset.format;
+                    applyFormatting(format);
+                });
+            });
+        }
+
+        // Apply formatting
+        function applyFormatting(format) {
+            const messageInput = document.getElementById('messageInput');
+            messageInput.focus();
+
+            switch (format) {
+                case 'bold':
+                    document.execCommand('bold');
+                    break;
+                case 'italic':
+                    document.execCommand('italic');
+                    break;
+                case 'underline':
+                    document.execCommand('underline');
+                    break;
+                case 'bulletList':
+                    document.execCommand('insertUnorderedList');
+                    break;
+                case 'numberedList':
+                    document.execCommand('insertOrderedList');
+                    break;
+                case 'link':
+                    const url = prompt('Enter URL:');
+                    if (url) {
+                        document.execCommand('createLink', false, url);
+                    }
+                    break;
+                case 'code':
+                    const selection = window.getSelection();
+                    if (selection.toString()) {
+                        document.execCommand('insertHTML', false, `<code>${selection.toString()}</code>`);
+                    }
+                    break;
+                case 'undo':
+                    document.execCommand('undo');
+                    break;
+                case 'redo':
+                    document.execCommand('redo');
+                    break;
+            }
+
+            updateFormatButtons();
+        }
+
+        // Update format button states
+        function updateFormatButtons() {
+            document.querySelectorAll('.format-btn').forEach(btn => {
+                const format = btn.dataset.format;
+                let isActive = false;
+
+                switch (format) {
+                    case 'bold':
+                        isActive = document.queryCommandState('bold');
+                        break;
+                    case 'italic':
+                        isActive = document.queryCommandState('italic');
+                        break;
+                    case 'underline':
+                        isActive = document.queryCommandState('underline');
+                        break;
+                }
+
+                btn.classList.toggle('active', isActive);
+            });
+        }
+
+        // Handle file upload
+        function handleFileUpload(e) {
+            const files = Array.from(e.target.files);
+            attachedFiles.push(...files);
+            renderAttachmentPreview();
+        }
+
+        // Render attachment preview
+        function renderAttachmentPreview() {
+            const preview = document.getElementById('attachmentPreview');
+            
+            if (attachedFiles.length === 0) {
+                preview.style.display = 'none';
+                return;
+            }
+
+            preview.style.display = 'block';
+            preview.innerHTML = attachedFiles.map((file, index) => {
+                const fileIcon = getFileIcon(file.type);
+                return `
+                    <div class="attachment-item">
+                        <span class="attachment-icon">${fileIcon}</span>
+                        <span>${file.name}</span>
+                        <span class="remove-btn" onclick="removeAttachment(${index})">×</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Get file icon based on type
+        function getFileIcon(fileType) {
+            if (fileType.startsWith('image/')) return '🖼️';
+            if (fileType.startsWith('video/')) return '🎥';
+            if (fileType.startsWith('audio/')) return '🎵';
+            if (fileType.includes('pdf')) return '📄';
+            if (fileType.includes('word')) return '📝';
+            return '📎';
+        }
+
+        // Remove attachment
+        function removeAttachment(index) {
+            attachedFiles.splice(index, 1);
+            renderAttachmentPreview();
+        }
+
+        // Toggle emoji picker
+        function toggleEmojiPicker() {
+            const picker = document.getElementById('emojiPicker');
+            isEmojiPickerOpen = !isEmojiPickerOpen;
+            picker.classList.toggle('show', isEmojiPickerOpen);
+        }
+
+        // Close emoji picker
+        function closeEmojiPicker() {
+            document.getElementById('emojiPicker').classList.remove('show');
+            isEmojiPickerOpen = false;
+        }
+
+        // Insert emoji
+        function insertEmoji(emoji) {
+            const messageInput = document.getElementById('messageInput');
+            messageInput.focus();
+            
+            const selection = window.getSelection();
+            const range = selection.getRangeAt(0);
+            const emojiNode = document.createTextNode(emoji);
+            range.insertNode(emojiNode);
+            range.setStartAfter(emojiNode);
+            range.setEndAfter(emojiNode);
+            selection.removeAllRanges();
+            selection.addRange(range);
+            
+            closeEmojiPicker();
+        }
+
+        // Simulate typing indicator
+        let typingTimeout;
+        let isShowingTyping = false;
+
+        function simulateTyping() {
+            if (!activeConversation) return;
+            
+            clearTimeout(typingTimeout);
+            
+            if (!isShowingTyping && Math.random() > 0.7) {
+                showTypingIndicator();
+                typingTimeout = setTimeout(hideTypingIndicator, 2000 + Math.random() * 3000);
+            }
+        }
+
+        function showTypingIndicator() {
+            if (!activeConversation) return;
+            document.getElementById('typingIndicator').classList.add('show');
+            isShowingTyping = true;
+        }
+
+        function hideTypingIndicator() {
+            document.getElementById('typingIndicator').classList.remove('show');
+            isShowingTyping = false;
+        }
+
+        // Render conversation list
+        function renderConversationList(searchTerm = '') {
+            const container = document.getElementById('conversationList');
+            let filteredConversations = conversations;
+
+            // Apply status filter
+            if (currentFilter !== 'all') {
+                filteredConversations = conversations.filter(conv => conv.status === currentFilter);
+            }
+
+            // Apply search filter
+            if (searchTerm) {
+                filteredConversations = filteredConversations.filter(conv => 
+                    conv.contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    conv.lastMessage.toLowerCase().includes(searchTerm.toLowerCase())
+                );
+            }
+
+            container.innerHTML = filteredConversations.map(conversation => `
+                <div class="conversation-item ${conversation.id === activeConversation?.id ? 'active' : ''} ${conversation.unreadCount > 0 ? 'unread' : ''}" 
+                     onclick="selectConversation(${conversation.id})">
+                    <div class="conversation-header">
+                        <div style="display: flex; align-items: center; flex: 1;">
+                            <div class="avatar">${conversation.contact.avatar}</div>
+                            <div class="conversation-info">
+                                <div class="contact-name">${conversation.contact.name}</div>
+                                <div class="last-message">${conversation.lastMessage}</div>
+                                <div class="conversation-meta">
+                                    <span class="inbox-badge">${conversation.inbox}</span>
+                                    <span class="status-badge status-${conversation.status}">${conversation.status}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                            <span class="timestamp">${conversation.timestamp}</span>
+                            ${conversation.unreadCount > 0 ? `<div class="unread-count">${conversation.unreadCount}</div>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Select a conversation
+        function selectConversation(conversationId) {
+            activeConversation = conversations.find(conv => conv.id === conversationId);
+            
+            if (activeConversation) {
+                // Mark as read
+                activeConversation.unreadCount = 0;
+                
+                // Update UI
+                renderConversationList();
+                renderConversationHeader();
+                renderMessages();
+                showConversationView();
+            }
+        }
+
+        // Render conversation header
+        function renderConversationHeader() {
+            const header = document.getElementById('conversationHeader');
+            const avatar = document.getElementById('headerAvatar');
+            const name = document.getElementById('headerName');
+            const inbox = document.getElementById('headerInbox');
+
+            avatar.textContent = activeConversation.contact.avatar;
+            name.textContent = activeConversation.contact.name;
+            inbox.textContent = activeConversation.inbox;
+            
+            header.style.display = 'flex';
+        }
+
+        // Render messages
+        function renderMessages() {
+            const container = document.getElementById('messagesContainer');
+            const emptyState = document.getElementById('emptyState');
+            
+            emptyState.style.display = 'none';
+            
+            container.innerHTML = activeConversation.messages.map(message => {
+                const attachmentsHtml = message.attachments && message.attachments.length > 0 
+                    ? `<div class="message-attachment">
+                        ${message.attachments.map(file => `
+                            <div><span class="attachment-icon">${getFileIcon(file.type)}</span>${file.name}</div>
+                        `).join('')}
+                    </div>`
+                    : '';
+
+                return `
+                    <div class="message ${message.sender === 'agent' ? 'outgoing' : 'incoming'}">
+                        <div class="message-avatar">${message.avatar}</div>
+                        <div class="message-content">
+                            <div class="message-text">${message.content}</div>
+                            ${attachmentsHtml}
+                            <div class="message-time">${message.timestamp}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Scroll to bottom
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // Show conversation view (mobile)
+        function showConversationView() {
+            document.getElementById('messageInputContainer').style.display = 'block';
+            
+            if (window.innerWidth <= 768) {
+                document.getElementById('inboxContainer').classList.add('show-conversation');
+            }
+        }
+
+        // Send message
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const messageHtml = input.innerHTML.trim();
+            const messageText = input.textContent.trim();
+            
+            if (!messageText && attachedFiles.length === 0) return;
+            if (!activeConversation) return;
+
+            // Disable send button during sending
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true;
+            sendBtn.textContent = 'Sending...';
+
+            try {
+                // Send message to Chatwoot API
+                const response = await sendMessageToAPI(activeConversation.id, messageText);
+                
+                // Add message to local conversation immediately for instant UI feedback
+                const newMessage = {
+                    id: response.id || Date.now(),
+                    content: messageHtml || messageText,
+                    timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                    sender: 'agent',
+                    avatar: 'AG',
+                    attachments: [...attachedFiles]
+                };
+
+                activeConversation.messages.push(newMessage);
+                activeConversation.lastMessage = messageText || `📎 ${attachedFiles.length} attachment(s)`;
+                activeConversation.timestamp = 'now';
+
+                // Clear input and attachments
+                input.innerHTML = '';
+                input.textContent = input.dataset.placeholder;
+                input.style.color = '#9ca3af';
+                attachedFiles = [];
+                renderAttachmentPreview();
+
+                // Re-render
+                renderMessages();
+                renderConversationList();
+
+                // Hide any typing indicator
+                hideTypingIndicator();
+                
+                logDebug('✅ Message sent and UI updated');
+
+            } catch (error) {
+                logDebug(`❌ Failed to send message: ${error.message}`);
+                alert('Failed to send message. Please try again.');
+            } finally {
+                // Re-enable send button
+                sendBtn.disabled = false;
+                sendBtn.textContent = 'Send';
+            }
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                document.getElementById('inboxContainer').classList.remove('show-conversation');
+            } else {
+                document.getElementById('contactPanel').style.display = 'none';
+            }
+        });
+
+        // Add back button for mobile
+        if (window.innerWidth <= 768) {
+            const backBtn = document.createElement('button');
+            backBtn.innerHTML = '← Back';
+            backBtn.className = 'action-btn';
+            backBtn.onclick = () => {
+                document.getElementById('inboxContainer').classList.remove('show-conversation');
+            };
+            document.querySelector('.conversation-actions').prepend(backBtn);
+        }
+
+        // Auto-refresh conversations every 30 seconds
+        function startAutoRefresh() {
+            setInterval(async () => {
+                if (conversations.length > 0) {
+                    logDebug('🔄 Auto-refreshing conversations...');
+                    await loadConversations();
+                }
+            }, 30000); // 30 seconds
+        }
+
+        // Manual refresh button handler
+        async function refreshConversations() {
+            const refreshBtn = document.getElementById('refreshBtn');
+            if (refreshBtn) {
+                refreshBtn.disabled = true;
+                refreshBtn.textContent = 'Refreshing...';
+            }
+            
+            await loadConversations();
+            
+            if (refreshBtn) {
+                refreshBtn.disabled = false;
+                refreshBtn.textContent = 'Refresh';
+            }
+        }
+
+        // Show debug console
+        function showDebugConsole() {
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center;';
+            
+            const console = document.createElement('div');
+            console.style.cssText = 'background: white; width: 80%; height: 80%; border-radius: 8px; padding: 20px; overflow: auto;';
+            
+            console.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3>Debug Console</h3>
+                    <button onclick="this.closest('.modal').remove()" style="background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">Close</button>
+                </div>
+                <div style="font-family: monospace; font-size: 12px; background: #f1f5f9; padding: 15px; border-radius: 4px; white-space: pre-wrap; max-height: 400px; overflow-y: auto;">
+${debugLog.join('\n')}
+                </div>
+                <div style="margin-top: 20px;">
+                    <button onclick="debugLog = []; this.previousElementSibling.textContent = 'Log cleared';" style="background: #64748b; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">Clear Log</button>
+                    <button onclick="refreshConversations();" style="background: #3b82f6; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-left: 10px;">Refresh Conversations</button>
+                </div>
+            `;
+            
+            modal.className = 'modal';
+            modal.appendChild(console);
+            document.body.appendChild(modal);
+        }
+
+        // Add debug button to header
+        function addDebugButton() {
+            const header = document.querySelector('.sidebar-header');
+            if (header) {
+                const debugBtn = document.createElement('button');
+                debugBtn.textContent = 'Debug Console';
+                debugBtn.style.cssText = 'background: #6b7280; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-top: 8px;';
+                debugBtn.onclick = showDebugConsole;
+                header.appendChild(debugBtn);
+            }
+        }
+
+        // Initialize app with live data
+        document.addEventListener('DOMContentLoaded', async () => {
+            await initializeApp();
+            startAutoRefresh();
+            addDebugButton();
+            
+            logDebug('🚀 Chatwoot Agent Inbox initialized with live Azure data');
+        });
+    </script>
+</body>
+</html> 

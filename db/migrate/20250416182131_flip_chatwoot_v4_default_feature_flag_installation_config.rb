@@ -19,6 +19,7 @@ class FlipChatwootV4DefaultFeatureFlagInstallationConfig < ActiveRecord::Migrati
       accounts.each { |account| account.enable_features!('chatwoot_v4') }
     end
 
-    GlobalConfig.clear_cache
+    # Skipping this for local development to avoid Redis issues
+    # GlobalConfig.clear_cache
   end
 end

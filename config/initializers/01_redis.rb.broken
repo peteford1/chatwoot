@@ -1,0 +1,26 @@
+# Alfred
+# Add here as you use it for more features
+# Used for Round Robin, Conversation Emails & Online Presence
+$alfred = ConnectionPool.new(size: 5, timeout: 1) do
+  redis = if Rails.env.development?
+            Redis.new(url: 'redis://127.0.0.1:6379')
+          elsif Rails.env.test?
+            MockRedis.new
+          else
+            Redis.new(Redis::Config.app)
+          end
+  Redis::Namespace.new('alfred', redis: redis, warning: true)
+end
+
+# Velma : Determined protector
+# used in rack attack
+$velma = ConnectionPool.new(size: 5, timeout: 1) do
+  config = if Rails.env.development?
+             Redis.new(url: 'redis://127.0.0.1:6379')
+           elsif Rails.env.test?
+             MockRedis.new
+           else
+             Redis.new(Redis::Config.app)
+           end
+  Redis::Namespace.new('velma', redis: config, warning: true)
+end

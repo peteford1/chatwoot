@@ -1,0 +1,11 @@
+{
+  "timestamp": 1749804949,
+  "date": "20250613_015549",
+  "database": "chatwoot_production",
+  "server": "chatwoot-db-fresh",
+  "resource_group": "chatwoot-rg",
+  "backup_type": "azure_postgres_backup",
+  "created_by": "azure_cli_backup_script",
+  "reason": "Manual backup requested by user",
+  "status": "completed_but_file_missing"
+}

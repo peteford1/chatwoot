@@ -8,31 +8,34 @@ Rails.application.routes.draw do
     omniauth_callbacks: 'devise_overrides/omniauth_callbacks'
   }, via: [:get, :post]
 
-  ## renders the frontend paths only if its not an api only server
-  if ActiveModel::Type::Boolean.new.cast(ENV.fetch('CW_API_ONLY_SERVER', false))
-    root to: 'api#index'
-  else
-    root to: 'dashboard#index'
+  ## Frontend routes enabled for full installation
+  # 2025-06-04 06:35:00 - Disabled API_ONLY_SERVER check to enable full frontend functionality
+  # Previous: if ActiveModel::Type::Boolean.new.cast(ENV.fetch('CW_API_ONLY_SERVER', false))
+  # Reason: Deploying full Chatwoot installation instead of API-only backend
+  
+  # Full frontend routes enabled
+  root to: 'dashboard#index'
 
-    get '/app', to: 'dashboard#index'
-    get '/app/*params', to: 'dashboard#index'
-    get '/app/accounts/:account_id/settings/inboxes/new/twitter', to: 'dashboard#index', as: 'app_new_twitter_inbox'
-    get '/app/accounts/:account_id/settings/inboxes/new/microsoft', to: 'dashboard#index', as: 'app_new_microsoft_inbox'
-    get '/app/accounts/:account_id/settings/inboxes/new/instagram', to: 'dashboard#index', as: 'app_new_instagram_inbox'
-    get '/app/accounts/:account_id/settings/inboxes/new/:inbox_id/agents', to: 'dashboard#index', as: 'app_twitter_inbox_agents'
-    get '/app/accounts/:account_id/settings/inboxes/new/:inbox_id/agents', to: 'dashboard#index', as: 'app_email_inbox_agents'
-    get '/app/accounts/:account_id/settings/inboxes/new/:inbox_id/agents', to: 'dashboard#index', as: 'app_instagram_inbox_agents'
-    get '/app/accounts/:account_id/settings/inboxes/:inbox_id', to: 'dashboard#index', as: 'app_instagram_inbox_settings'
-    get '/app/accounts/:account_id/settings/inboxes/:inbox_id', to: 'dashboard#index', as: 'app_email_inbox_settings'
+  get '/app', to: 'dashboard#index'
+  get '/app/*params', to: 'dashboard#index'
+  get '/app/accounts/:account_id/settings/inboxes/new/twitter', to: 'dashboard#index', as: 'app_new_twitter_inbox'
+  get '/app/accounts/:account_id/settings/inboxes/new/microsoft', to: 'dashboard#index', as: 'app_new_microsoft_inbox'
+  get '/app/accounts/:account_id/settings/inboxes/new/instagram', to: 'dashboard#index', as: 'app_new_instagram_inbox'
+  get '/app/accounts/:account_id/settings/inboxes/new/:inbox_id/agents', to: 'dashboard#index', as: 'app_twitter_inbox_agents'
+  get '/app/accounts/:account_id/settings/inboxes/new/:inbox_id/agents', to: 'dashboard#index', as: 'app_email_inbox_agents'
+  get '/app/accounts/:account_id/settings/inboxes/new/:inbox_id/agents', to: 'dashboard#index', as: 'app_instagram_inbox_agents'
+  get '/app/accounts/:account_id/settings/inboxes/:inbox_id', to: 'dashboard#index', as: 'app_instagram_inbox_settings'
+  get '/app/accounts/:account_id/settings/inboxes/:inbox_id', to: 'dashboard#index', as: 'app_email_inbox_settings'
 
-    resource :widget, only: [:show]
-    namespace :survey do
-      resources :responses, only: [:show]
-    end
-    resource :slack_uploads, only: [:show]
+  resource :widget, only: [:show]
+  namespace :survey do
+    resources :responses, only: [:show]
   end
+  resource :slack_uploads, only: [:show]
 
+  # API routes available for both frontend and external access
   get '/api', to: 'api#index'
+  get '/health', to: 'api#index'
   namespace :api, defaults: { format: 'json' } do
     namespace :v1 do
       # ----------------------------------
@@ -222,6 +225,15 @@ Rails.application.routes.draw do
           end
 
           resources :webhooks, only: [:index, :create, :update, :destroy]
+          
+          # Custom SyncAccounts service routes
+          # 2025-06-10 13:20:00 - Added SyncAccounts API for external system integration
+          resources :sync_accounts, only: [:index, :create] do
+            collection do
+              get :health
+            end
+          end
+          
           namespace :integrations do
             resources :apps, only: [:index, :show]
             resources :hooks, only: [:show, :create, :update, :destroy] do
@@ -395,7 +407,7 @@ Rails.application.routes.draw do
         resources :agent_bots, only: [:index, :create, :show, :update, :destroy] do
           delete :avatar, on: :member
         end
-        resources :accounts, only: [:create, :show, :update, :destroy] do
+        resources :accounts, only: [:index, :create, :show, :update, :destroy] do
           resources :account_users, only: [:index, :create] do
             collection do
               delete :destroy
@@ -452,6 +464,12 @@ Rails.application.routes.draw do
   # ----------------------------------------------------------------------
   # Routes for channel integrations
   mount Facebook::Messenger::Server, at: 'bot'
+
+  # ActionCable WebSocket endpoint for real-time features
+  # 2025-06-04 06:30:00 - Added ActionCable mount to enable WebSocket functionality for external frontend
+  # Previous: No ActionCable mount, causing 404 errors on /cable endpoint
+  mount ActionCable.server => '/cable'
+
   get 'webhooks/twitter', to: 'api/v1/webhooks#twitter_crc'
   post 'webhooks/twitter', to: 'api/v1/webhooks#twitter_events'
   post 'webhooks/line/:line_channel_id', to: 'webhooks/line#process_payload'

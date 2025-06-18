@@ -1,0 +1,211 @@
+# Cursor AI Rules for Chatwoot Environment Management
+# Updated: $(date +%Y-%m-%d) - Established environment boundaries and CI/CD constraints
+
+## 🚨 CRITICAL ENVIRONMENT CONSTRAINTS
+
+### Database Operations - NEVER BYPASS API
+- NEVER use direct database commands for accounts, users, or inboxes
+- ALL account/user/inbox changes MUST go through API endpoints
+- NO direct SQL modifications to production data
+- NO rails console commands that modify user data in production
+
+### Environment Boundaries
+- development: Uses `chatwoot` database via `chatwoot-backend-test`
+- staging: Uses `chatwoot_staging` database via `chatwoot-backend-staging` 
+- production: Uses `chatwoot_production` database via `chatwoot-backend-prod`
+
+### Deployment Rules
+- ONLY deploy through GitHub Actions CI/CD pipeline
+- NO manual container app updates outside of emergency situations
+- NO direct Azure CLI deployments bypassing the workflow
+- ALL environment changes must go through `config/environments.yml`
+
+## 📋 REQUIRED PRACTICES
+
+### Before Any Changes
+1. Check current environment: `ruby scripts/manage_environments.rb --status development`
+2. Verify which database you're targeting
+3. Confirm the change aligns with the environment's purpose
+
+### Configuration Changes
+- ALWAYS comment out old values with timestamp and reason
+- NEVER delete configuration files - rename with .bck and timestamp
+- ALL backups go to `./backup/` folder
+- Use environment-specific configurations from `config/environments.yml`
+
+### Code Changes
+- Write environment-aware code (local/test/stage/prod)
+- Check for running services before starting new ones
+- Find available ports if default ports are occupied
+- Handle errors gracefully - never suppress them
+
+### Testing & Deployment
+- Run tests before any deployment
+- Use feature branches for development
+- Only merge to `develop` for staging
+- Only merge to `main` for production
+- Ask about GitHub updates if all tests pass (max once per 15 minutes)
+
+## 🔧 ENVIRONMENT-SPECIFIC COMMANDS
+
+### Development Environment
+```bash
+# Check status
+ruby scripts/manage_environments.rb --status development
+
+# View logs
+az containerapp logs show --name chatwoot-backend-test --resource-group SM-Test --follow
+
+# Environment variables
+ruby scripts/manage_environments.rb --env-vars development
+```
+
+### Staging Environment  
+```bash
+# Check status
+ruby scripts/manage_environments.rb --status staging
+
+# View logs
+az containerapp logs show --name chatwoot-backend-staging --resource-group SM-Test --follow
+
+# Environment variables
+ruby scripts/manage_environments.rb --env-vars staging
+```
+
+### Production Environment
+```bash
+# Check status
+ruby scripts/manage_environments.rb --status production
+
+# View logs  
+az containerapp logs show --name chatwoot-backend-prod --resource-group SM-Test --follow
+
+# Environment variables
+ruby scripts/manage_environments.rb --env-vars production
+```
+
+## 🚫 FORBIDDEN ACTIONS
+
+### Database Direct Access
+- NO `az postgres flexible-server execute` commands for user data
+- NO direct database connections bypassing the application
+- NO manual data migrations outside of Rails migrations
+- NO SQL scripts that modify accounts/users/inboxes
+
+### Container Management
+- NO `az containerapp update` without going through CI/CD
+- NO manual environment variable changes via Azure CLI
+- NO direct image deployments bypassing the registry workflow
+- NO scaling changes without updating environment configuration
+
+### Configuration Bypassing
+- NO hardcoded environment values in code
+- NO direct secret modifications in Azure
+- NO bypassing the GitHub Actions workflow
+- NO manual certificate or DNS changes
+
+## ✅ APPROVED WORKFLOWS
+
+### Making Changes
+1. Create feature branch: `git checkout -b feature/your-change`
+2. Make changes following environment rules
+3. Test locally if possible
+4. Commit and push to trigger CI/CD
+5. Monitor deployment through GitHub Actions
+6. Verify in target environment
+
+### Environment Management
+1. Use `ruby scripts/manage_environments.rb` for all environment operations
+2. Update `config/environments.yml` for configuration changes
+3. Use GitHub secrets for sensitive data
+4. Follow the branch strategy (feature → develop → main)
+
+### Debugging Issues
+1. Check existing debug files in `./debug/` folder first
+2. Create new debug file with timestamp if new issue
+3. Document symptoms, validation steps, and resolution
+4. Ask user before recording permanent solutions
+5. Update debug files with additional symptoms if same root cause
+
+## 🔍 ENVIRONMENT VALIDATION
+
+### Before Any Operation, Verify:
+```bash
+# Current environment status
+ruby scripts/manage_environments.rb --list
+
+# Database connections
+az postgres flexible-server list --query "[].{Name:name, State:state}" -o table
+
+# Container app status
+az containerapp list --query "[].{Name:name, Status:properties.runningStatus}" -o table
+
+# GitHub Actions status
+gh run list --limit 5
+```
+
+### Environment Health Checks
+```bash
+# Development
+curl -s https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io/health
+
+# Staging (when created)
+curl -s https://chatwoot-backend-staging.yourdomain.com/health
+
+# Production (when created)  
+curl -s https://chatwoot-backend-prod.yourdomain.com/health
+```
+
+## 📊 MONITORING REQUIREMENTS
+
+### Always Check Before Changes
+- Current environment status
+- Recent deployment history
+- Any running background jobs
+- Database connection health
+- Available system resources
+
+### After Changes
+- Verify deployment succeeded
+- Check application health endpoints
+- Monitor logs for errors
+- Validate functionality in target environment
+- Document any issues in debug files
+
+## 🎯 CURSOR AI SPECIFIC RULES
+
+### When Suggesting Code Changes
+- ALWAYS specify which environment the change targets
+- Include environment validation steps
+- Provide rollback instructions
+- Consider impact on all three environments
+
+### When Debugging Issues
+- Check debug files first: `ls -la debug/`
+- Use environment-specific debugging approaches
+- Create timestamped debug files for new issues
+- Follow the established debug workflow
+
+### When Proposing Deployments
+- NEVER suggest manual Azure CLI deployments
+- ALWAYS use the GitHub Actions workflow
+- Verify the target branch matches intended environment
+- Include post-deployment verification steps
+
+## 🔐 SECURITY BOUNDARIES
+
+### Secrets Management
+- NEVER expose secrets in code or logs
+- Use GitHub secrets for all sensitive data
+- Environment-specific secret isolation
+- No hardcoded credentials anywhere
+
+### Access Control
+- Respect service principal permissions
+- No privilege escalation attempts
+- Use least-privilege access patterns
+- Audit trail for all changes
+
+---
+
+**🎯 SUMMARY: Always use the established CI/CD pipeline, respect environment boundaries, and follow the documented workflows. When in doubt, check the environment status first!** 

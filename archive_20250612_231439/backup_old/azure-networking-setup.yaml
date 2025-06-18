@@ -1,0 +1,36 @@
+# Virtual Network for Application Gateway
+apiVersion: '2023-05-01'
+location: eastus
+name: voicelinkai-vnet
+type: Microsoft.Network/virtualNetworks
+properties:
+  addressSpace:
+    addressPrefixes:
+    - 10.0.0.0/16
+  subnets:
+  - name: gateway-subnet
+    properties:
+      addressPrefix: 10.0.1.0/24
+  - name: backend-subnet
+    properties:
+      addressPrefix: 10.0.2.0/24
+tags:
+  purpose: "VoiceLink AI Gateway Network"
+  environment: "production"
+
+---
+
+# Public IP for Application Gateway
+apiVersion: '2023-05-01'
+location: eastus
+name: voicelinkai-gateway-ip
+type: Microsoft.Network/publicIPAddresses
+properties:
+  publicIPAllocationMethod: Static
+  sku:
+    name: Standard
+  dnsSettings:
+    domainNameLabel: voicelinkai-gateway
+tags:
+  purpose: "VoiceLink AI Gateway Public IP"
+  environment: "production" 

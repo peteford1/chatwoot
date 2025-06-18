@@ -1,0 +1,147 @@
+{
+  "migration_timestamp": "2025-06-13T02:14:04-0700",
+  "conversation_id": 1,
+  "source_inbox_id": 2,
+  "target_inbox_id": 6,
+  "original_conversation_data": {
+    "meta": {
+      "sender": {
+        "additional_attributes": {
+        },
+        "availability_status": "offline",
+        "email": null,
+        "id": 1,
+        "name": "Test User",
+        "phone_number": "+14353397687",
+        "blocked": false,
+        "identifier": null,
+        "thumbnail": "",
+        "custom_attributes": {
+        },
+        "created_at": 1749767598
+      },
+      "channel": "Channel::Sms",
+      "hmac_verified": false
+    },
+    "id": 1,
+    "messages": [
+      {
+        "id": 11,
+        "content": "suck",
+        "account_id": 1,
+        "inbox_id": 2,
+        "conversation_id": 1,
+        "message_type": 1,
+        "created_at": 1749797853,
+        "updated_at": "2025-06-13T06:57:33.155Z",
+        "private": false,
+        "status": "sent",
+        "source_id": null,
+        "content_type": "text",
+        "content_attributes": {
+        },
+        "sender_type": "User",
+        "sender_id": 1,
+        "external_source_ids": {
+        },
+        "additional_attributes": {
+        },
+        "processed_message_content": "suck",
+        "sentiment": {
+        },
+        "conversation": {
+          "assignee_id": null,
+          "unread_count": 1,
+          "last_activity_at": 1749797853,
+          "contact_inbox": {
+            "source_id": "+14353397687"
+          }
+        },
+        "sender": {
+          "id": 1,
+          "name": "Super Admin",
+          "available_name": "Super Admin",
+          "avatar_url": "",
+          "type": "user",
+          "availability_status": "offline",
+          "thumbnail": ""
+        }
+      }
+    ],
+    "account_id": 1,
+    "uuid": "80553b29-83fc-40c0-bfff-28d4ac8b0d4c",
+    "additional_attributes": {
+    },
+    "agent_last_seen_at": 0,
+    "assignee_last_seen_at": 0,
+    "can_reply": true,
+    "contact_last_seen_at": 0,
+    "custom_attributes": {
+    },
+    "inbox_id": 2,
+    "labels": [
+
+    ],
+    "muted": false,
+    "snoozed_until": null,
+    "status": "open",
+    "created_at": 1749767613,
+    "updated_at": 1749797853.160925,
+    "timestamp": 1749797853,
+    "first_reply_created_at": 1749767637,
+    "unread_count": 1,
+    "last_non_activity_message": {
+      "id": 11,
+      "content": "suck",
+      "account_id": 1,
+      "inbox_id": 2,
+      "conversation_id": 1,
+      "message_type": 1,
+      "created_at": 1749797853,
+      "updated_at": "2025-06-13T06:57:33.155Z",
+      "private": false,
+      "status": "sent",
+      "source_id": null,
+      "content_type": "text",
+      "content_attributes": {
+      },
+      "sender_type": "User",
+      "sender_id": 1,
+      "external_source_ids": {
+      },
+      "additional_attributes": {
+      },
+      "processed_message_content": "suck",
+      "sentiment": {
+      },
+      "conversation": {
+        "assignee_id": null,
+        "unread_count": 1,
+        "last_activity_at": 1749797853,
+        "contact_inbox": {
+          "source_id": "+14353397687"
+        }
+      },
+      "sender": {
+        "id": 1,
+        "name": "Super Admin",
+        "available_name": "Super Admin",
+        "avatar_url": "",
+        "type": "user",
+        "availability_status": "offline",
+        "thumbnail": ""
+      }
+    },
+    "last_activity_at": 1749797853,
+    "priority": null,
+    "waiting_since": 0,
+    "sla_policy_id": null
+  },
+  "reason": "Moving conversation before deleting duplicate inbox",
+  "migration_status": "success",
+  "migration_method": "PATCH https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io/api/v1/accounts/1/conversations/1",
+  "migration_response_code": 200,
+  "migration_response_body": "{\"meta\":{\"sender\":{\"additional_attributes\":{},\"availability_status\":\"offline\",\"email\":null,\"id\":1,\"name\":\"Test User\",\"phone_number\":\"+14353397687\",\"blocked\":false,\"identifier\":null,\"thumbnail\":\"\",\"custom_attributes\":{},\"created_at\":1749767598},\"channel\":\"Channel::Sms\",\"hmac_verified\":false},\"id\":1,\"messages\":[{\"id\":11,\"content\":\"suck\",\"account_id\":1,\"inbox_id\":2,\"conversation_id\":1,\"message_type\":1,\"created_at\":1749797853,\"updated_at\":\"2025-06-13T06:57:33.155Z\",\"private\":false,\"status\":\"sent\",\"source_id\":null,\"content_type\":\"text\",\"content_attributes\":{},\"sender_type\":\"User\",\"sender_id\":1,\"external_source_ids\":{},\"additional_attributes\":{},\"processed_message_content\":\"suck\",\"sentiment\":{},\"conversation\":{\"assignee_id\":null,\"unread_count\":1,\"last_activity_at\":1749797853,\"contact_inbox\":{\"source_id\":\"+14353397687\"}},\"sender\":{\"id\":1,\"name\":\"Super Admin\",\"available_name\":\"Super Admin\",\"avatar_url\":\"\",\"type\":\"user\",\"availability_status\":\"offline\",\"thumbnail\":\"\"}}],\"account_id\":1,\"uuid\":\"80553b29-83fc-40c0-bfff-28d4ac8b0d4c\",\"additional_attributes\":{},\"agent_last_seen_at\":0,\"assignee_last_seen_at\":0,\"can_reply\":true,\"contact_last_seen_at\":0,\"custom_attributes\":{},\"inbox_id\":2,\"labels\":[],\"muted\":false,\"snoozed_until\":null,\"status\":\"open\",\"created_at\":1749767613,\"updated_at\":1749797853.160925,\"timestamp\":1749797853,\"first_reply_created_at\":1749767637,\"unread_count\":1,\"last_non_activity_message\":{\"id\":11,\"content\":\"suck\",\"account_id\":1,\"inbox_id\":2,\"conversation_id\":1,\"message_type\":1,\"created_at\":1749797853,\"updated_at\":\"2025-06-13T06:57:33.155Z\",\"private\":false,\"status\":\"sent\",\"source_id\":null,\"content_type\":\"text\",\"content_attributes\":{},\"sender_type\":\"User\",\"sender_id\":1,\"external_source_ids\":{},\"additional_attributes\":{},\"processed_message_content\":\"suck\",\"sentiment\":{},\"conversation\":{\"assignee_id\":null,\"unread_count\":1,\"last_activity_at\":1749797853,\"contact_inbox\":{\"source_id\":\"+14353397687\"}},\"sender\":{\"id\":1,\"name\":\"Super Admin\",\"available_name\":\"Super Admin\",\"avatar_url\":\"\",\"type\":\"user\",\"availability_status\":\"offline\",\"thumbnail\":\"\"}},\"last_activity_at\":1749797853,\"priority\":null,\"waiting_since\":0,\"sla_policy_id\":null}",
+  "verification_status": "failed",
+  "source_inbox_empty": false
+}

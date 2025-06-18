@@ -1,0 +1,19 @@
+FROM chatwoot/chatwoot:latest
+
+# Fix Azure PostgreSQL compatibility
+USER root
+
+# Create a simple script to patch the migration file
+RUN echo '#!/bin/bash' > /tmp/fix_migration.sh && \
+    echo 'sed -i "s/enable_extension(\"pg_stat_statements\")/# enable_extension(\"pg_stat_statements\") # Disabled for Azure PostgreSQL/" /app/db/migrate/20230426130150_init_schema.rb' >> /tmp/fix_migration.sh && \
+    chmod +x /tmp/fix_migration.sh && \
+    /tmp/fix_migration.sh
+
+# Verify the change was made
+RUN grep -n "pg_stat_statements" /app/db/migrate/20230426130150_init_schema.rb || echo "Extension line successfully commented out"
+
+# Switch back to the app user
+USER 1001
+
+# Set the default command
+CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-p", "3000"] 

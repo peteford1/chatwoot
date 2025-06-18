@@ -1,0 +1,14 @@
+{
+  "test_timestamp": "2025-06-13T02:36:32-0700",
+  "successful_logins": [
+
+  ],
+  "all_users_unconfirmed": true,
+  "api_token_working": true,
+  "recommendations": [
+    "Email confirmation system appears broken",
+    "All users show as unconfirmed",
+    "API token still works for backend access",
+    "May need manual database intervention"
+  ]
+}

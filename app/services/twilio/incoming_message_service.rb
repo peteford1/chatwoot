@@ -4,8 +4,6 @@ class Twilio::IncomingMessageService
   pattr_initialize [:params!]
 
   def perform
-    return if twilio_channel.blank?
-
     set_contact
     set_conversation
     @message = @conversation.messages.build(
@@ -48,7 +46,7 @@ class Twilio::IncomingMessageService
   end
 
   def message_body
-    params[:Body]&.delete("\u0000")
+    params[:Body]
   end
 
   def set_contact
@@ -133,7 +131,7 @@ class Twilio::IncomingMessageService
     Down.download(
       params[:MediaUrl0],
       # https://support.twilio.com/hc/en-us/articles/223183748-Protect-Media-Access-with-HTTP-Basic-Authentication-for-Programmable-Messaging
-      http_basic_authentication: [twilio_channel.account_sid, twilio_channel.auth_token || twilio_channel.api_key_sid]
+      http_basic_authentication: [twilio_channel.account_sid, twilio_channel.auth_token]
     )
   end
 

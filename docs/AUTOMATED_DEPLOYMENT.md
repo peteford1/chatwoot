@@ -7,9 +7,10 @@ This document explains how to use the automated GitHub Actions workflow to deplo
 The automated deployment workflow reproduces all the successful manual steps we performed:
 
 1. **Database Preparation**: Automatically runs `rails db:chatwoot_prepare` if needed
-2. **Container Deployment**: Creates Azure Container App with proper configuration
-3. **Environment Setup**: Configures all required environment variables
-4. **Health Checks**: Tests deployment and provides status reports
+2. **Account & User Seeding**: Creates initial account and admin user automatically
+3. **Container Deployment**: Creates Azure Container App with proper configuration
+4. **Environment Setup**: Configures all required environment variables
+5. **Health Checks**: Tests deployment and provides status reports
 
 ## Prerequisites
 
@@ -34,6 +35,7 @@ Set up these secrets in your GitHub repository (`Settings > Secrets and variable
 | `DB_PASSWORD` | PostgreSQL password | `Sunnymead123!` |
 | `SECRET_KEY_BASE` | Rails secret key | `supersecretkeybasefortest123456789abcdefghijklmnopqrstuvwxyz` |
 | `REDIS_URL` | Redis connection string | `rediss://default:PASSWORD@chatwoot-redis.redis.cache.windows.net:6380` |
+| `ADMIN_PASSWORD` | Initial admin user password | `Password1!` (optional, defaults to Password1!) |
 
 ## How to Use the Workflow
 
@@ -46,6 +48,9 @@ Set up these secrets in your GitHub repository (`Settings > Secrets and variable
 5. Fill in the parameters:
    - **Environment**: Choose `test`, `staging`, or `production`
    - **Container Name**: Enter a unique name (e.g., `chatwoot-automated-v1`)
+   - **Account Name**: Initial account name (default: VoiceLink AI)
+   - **Admin Email**: Admin user email (default: admin@voicelinkai.com)
+   - **Admin Name**: Admin user display name (default: Admin User)
 
 ### 2. Workflow Parameters
 
@@ -62,6 +67,9 @@ Set up these secrets in your GitHub repository (`Settings > Secrets and variable
 - ✅ Checks if database is already prepared (counts tables)
 - ✅ Runs `rails db:chatwoot_prepare` only if needed
 - ✅ Verifies successful preparation
+- ✅ Checks if accounts/users exist
+- ✅ Runs production seeder to create initial account and admin user
+- ✅ Verifies seeding results
 
 ### Stage 2: Container Deployment
 

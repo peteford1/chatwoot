@@ -1,0 +1,11 @@
+{
+  "test_timestamp": "2025-06-13T02:45:55-0700",
+  "admin_email": "admin@voicelinkai.com",
+  "password_used": "SuperAdmin123!",
+  "login_test_result": {
+    "endpoint": "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io/auth/sign_in",
+    "response_code": 200,
+    "success": true
+  },
+  "user_status_check": "Success"
+}

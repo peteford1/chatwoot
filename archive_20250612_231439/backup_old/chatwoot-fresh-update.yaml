@@ -1,0 +1,24 @@
+properties:
+  template:
+    containers:
+    - name: chatwoot-fresh
+      image: chatwootregistry95290.azurecr.io/chatwoot-full:v6-final
+      command: ["/bin/sh"]
+      args: ["-c", "bundle exec rails db:prepare && bundle exec rails server -b 0.0.0.0 -p 3000"]
+      env:
+      - name: DATABASE_URL
+        value: "postgresql://chatwootuser:P@ssword456!@chatwoot-db-fresh.postgres.database.azure.com/chatwoot"
+      - name: REDIS_URL
+        value: "redis://localhost:6379"
+      - name: RAILS_ENV
+        value: "production"
+      resources:
+        cpu: 0.75
+        memory: "1.5Gi"
+    - name: redis
+      image: redis:7-alpine
+      command: ["redis-server"]
+      args: ["--appendonly", "yes", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru"]
+      resources:
+        cpu: 0.25
+        memory: "0.5Gi" 

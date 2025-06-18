@@ -1,0 +1,33 @@
+# Custom Chatwoot Dockerfile
+# Extends official Chatwoot image with custom code and configurations
+
+FROM chatwoot/chatwoot:latest
+
+# Set working directory
+WORKDIR /app
+
+# Copy custom code into the container
+COPY custom/ /app/custom/
+
+# Copy modified core files that include custom routes and configurations
+COPY config/routes.rb /app/config/routes.rb
+
+# Create custom initializer for autoloading custom code (fixed approach)
+RUN echo "# Custom code autoloading - fixed for frozen array" > /app/config/initializers/custom_autoload.rb && \
+    echo "Rails.application.configure do" >> /app/config/initializers/custom_autoload.rb && \
+    echo "  config.autoload_paths += %W(\#{Rails.root}/custom/lib)" >> /app/config/initializers/custom_autoload.rb && \
+    echo "  config.autoload_paths += %W(\#{Rails.root}/custom/services)" >> /app/config/initializers/custom_autoload.rb && \
+    echo "  config.autoload_paths += %W(\#{Rails.root}/custom/controllers)" >> /app/config/initializers/custom_autoload.rb && \
+    echo "end" >> /app/config/initializers/custom_autoload.rb
+
+# Set proper permissions for custom scripts
+RUN find /app/custom/scripts -name "*.rb" -exec chmod +x {} \;
+
+# Create custom environment file if it doesn't exist
+RUN touch /app/.env.custom
+
+# Expose port
+EXPOSE 3000
+
+# Use the same entrypoint as the base image
+CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-p", "3000"] 

@@ -1,0 +1,10 @@
+{
+  "timestamp": 1749804838,
+  "date": "20250613_015358",
+  "database": "chatwoot_production",
+  "host": "chatwoot-db-fresh.postgres.database.azure.com",
+  "backup_type": "full_database_dump",
+  "created_by": "database_backup_script",
+  "reason": "Manual backup requested by user",
+  "status": "completed_but_file_missing"
+}

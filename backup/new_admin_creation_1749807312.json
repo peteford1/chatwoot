@@ -1,0 +1,22 @@
+{
+  "creation_timestamp": "2025-06-13T02:35:12-0700",
+  "new_user_email": "admin2@voicelinkai.com",
+  "new_user_password": "VoiceLink2025!",
+  "new_user_name": "VoiceLink Admin",
+  "user_created": true,
+  "user_id": 11,
+  "login_test_result": 401,
+  "user_data": {
+    "id": 11,
+    "account_id": 1,
+    "availability_status": "offline",
+    "auto_offline": true,
+    "confirmed": false,
+    "email": "admin2@voicelinkai.com",
+    "available_name": "VoiceLink Admin",
+    "name": "VoiceLink Admin",
+    "role": "administrator",
+    "thumbnail": "",
+    "custom_role_id": null
+  }
+}

@@ -1,0 +1,25 @@
+# Dockerfile for Azure Container Apps with Routing Fixes
+# Created: 2025-06-12 10:45:00
+# Purpose: Fix ActionCable routing and custom autoload issues
+
+FROM chatwoot/chatwoot:latest
+
+# Copy fixed configurations
+COPY config/routes.rb /app/config/routes.rb
+COPY config/initializers/cors.rb /app/config/initializers/cors.rb
+COPY config/initializers/custom_autoload.rb /app/config/initializers/custom_autoload.rb
+COPY config/initializers/01_inject_enterprise_edition_module.rb /app/config/initializers/01_inject_enterprise_edition_module.rb
+
+# Ensure ActionCable is properly configured
+RUN echo "ActionCable and routing fixes applied" > /app/ROUTING_FIXES_APPLIED
+
+# Create custom directories if they don't exist
+RUN mkdir -p /app/custom/lib /app/custom/services /app/custom/controllers
+
+# Set proper permissions
+RUN chown -R 1001:1001 /app/custom
+
+WORKDIR /app
+
+# The container will use the same startup command as defined in Azure Container Apps
+# bundle exec rails db:prepare && bundle exec rails server -b 0.0.0.0 -p 3000 

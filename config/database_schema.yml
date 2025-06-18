@@ -1,0 +1,50 @@
+# Database Configuration for Schema-based Environment Isolation
+# Updated: <%= Date.current %> - Added schema-based multi-environment support
+
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  timeout: 5000
+  host: <%= ENV.fetch("DB_HOST", "chatwoot-db-fresh.postgres.database.azure.com") %>
+  port: 5432
+  database: <%= ENV.fetch("SHARED_DATABASE_NAME", "chatwoot_shared") %>
+  username: <%= ENV.fetch("DB_USERNAME") %>
+  password: <%= ENV.fetch("DB_PASSWORD") %>
+  # Schema isolation - each environment uses its own schema
+  schema_search_path: <%= ENV.fetch("DATABASE_SCHEMA", "development") %>
+
+development:
+  <<: *default
+  schema_search_path: development
+  # Override with environment-specific database URL if provided
+  url: <%= ENV.fetch("DATABASE_URL", "postgresql://#{ENV.fetch('DB_USERNAME')}:#{ENV.fetch('DB_PASSWORD')}@#{ENV.fetch('DB_HOST', 'chatwoot-db-fresh.postgres.database.azure.com')}:5432/#{ENV.fetch('SHARED_DATABASE_NAME', 'chatwoot_shared')}?options=-csearch_path%3Ddevelopment") %>
+
+test:
+  <<: *default
+  schema_search_path: test
+  database: chatwoot_test
+  # Test environment can use a separate database for isolation
+
+staging:
+  <<: *default
+  schema_search_path: staging
+  url: <%= ENV.fetch("DATABASE_URL", "postgresql://#{ENV.fetch('DB_USERNAME')}:#{ENV.fetch('DB_PASSWORD')}@#{ENV.fetch('DB_HOST', 'chatwoot-db-fresh.postgres.database.azure.com')}:5432/#{ENV.fetch('SHARED_DATABASE_NAME', 'chatwoot_shared')}?options=-csearch_path%3Dstaging") %>
+
+production:
+  <<: *default
+  schema_search_path: production
+  url: <%= ENV.fetch("DATABASE_URL", "postgresql://#{ENV.fetch('DB_USERNAME')}:#{ENV.fetch('DB_PASSWORD')}@#{ENV.fetch('DB_HOST', 'chatwoot-db-fresh.postgres.database.azure.com')}:5432/#{ENV.fetch('SHARED_DATABASE_NAME', 'chatwoot_shared')}?options=-csearch_path%3Dproduction") %>
+
+# Schema Management Notes:
+# 
+# 1. Each environment uses the same database but different schemas
+# 2. The schema_search_path ensures complete data isolation
+# 3. Migrations will run in the appropriate schema for each environment
+# 4. This provides the same isolation as separate databases but with cost savings
+#
+# To manually switch schemas in Rails console:
+# ActiveRecord::Base.connection.execute("SET search_path TO staging")
+#
+# To verify current schema:
+# ActiveRecord::Base.connection.execute("SHOW search_path").first['search_path'] 

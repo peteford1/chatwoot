@@ -1,0 +1,41 @@
+apiVersion: '2021-07-01'
+location: eastus
+name: voicelinkai-gateway
+properties:
+  containers:
+  - name: voicelinkai-gateway
+    properties:
+      image: voicelinkcrm.azurecr.io/voicelinkai-gateway:v14-amd64
+      resources:
+        requests:
+          cpu: 0.3
+          memoryInGb: 1.0
+      ports:
+      - port: 8080
+        protocol: TCP
+      - port: 8090
+        protocol: TCP
+      environmentVariables:
+      - name: 'KRAKEND_PORT'
+        value: '8080'
+      - name: 'FC_ENABLE'
+        value: '1'
+      - name: 'FC_SETTINGS'
+        value: '/etc/krakend'
+  osType: Linux
+  restartPolicy: Always
+  imageRegistryCredentials:
+  - server: voicelinkcrm.azurecr.io
+    username: voicelinkcrm
+    password: staq8jJ5Vy72Qa43eBxy1e0KisgiBAogF7SIyD+ndf+ACRA3YPs2
+  ipAddress:
+    type: Public
+    ports:
+    - protocol: TCP
+      port: 8080
+    - protocol: TCP
+      port: 8090
+    dnsNameLabel: voicelinkai-gateway
+tags:
+  purpose: "VoiceLink AI Gateway"
+  environment: "production" 

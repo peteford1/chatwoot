@@ -1,0 +1,17 @@
+FROM chatwoot/chatwoot:latest
+
+# Fix Azure PostgreSQL compatibility for all problematic extensions
+USER root
+
+# Comment out all problematic extensions that are not allowed in Azure PostgreSQL
+RUN sed -i 's/enable_extension "pg_stat_statements"/# enable_extension "pg_stat_statements" # Disabled for Azure PostgreSQL/' /app/db/migrate/20230426130150_init_schema.rb && \
+    sed -i 's/enable_extension "pg_trgm"/# enable_extension "pg_trgm" # Disabled for Azure PostgreSQL/' /app/db/migrate/20230426130150_init_schema.rb
+
+# Verify the changes
+RUN grep -n "enable_extension" /app/db/migrate/20230426130150_init_schema.rb
+
+# Switch back to the app user
+USER 1001
+
+# Set the default command
+CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-p", "3000"] 

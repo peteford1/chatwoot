@@ -2,5 +2,70 @@
     "cSpell.words": [
         "chatwoot",
         "dompurify"
-    ]
+    ],
+    "cursor.general.enableAutoCompletion": true,
+    "cursor.general.enableCodeActions": true,
+    
+    // Environment Safety Settings - Updated $(date +%Y-%m-%d)
+    "terminal.integrated.env.osx": {
+        "CHATWOOT_ENV_CHECK": "REQUIRED",
+        "DEPLOYMENT_METHOD": "GITHUB_ACTIONS_ONLY",
+        "ENVIRONMENT_SCRIPT": "ruby scripts/manage_environments.rb",
+        "FORBIDDEN_DIRECT_DB": "true",
+        "REQUIRE_BRANCH_STRATEGY": "true"
+    },
+    
+    // File Associations for Environment Management
+    "files.associations": {
+        "*.cursorrules": "markdown",
+        "environments.yml": "yaml",
+        "azure-deploy.yml": "yaml"
+    },
+    
+    // Auto-save to prevent losing environment configurations
+    "files.autoSave": "onFocusChange",
+    
+    // Highlight dangerous commands
+    "editor.tokenColorCustomizations": {
+        "textMateRules": [
+            {
+                "scope": "string.quoted.double.shell",
+                "settings": {
+                    "foreground": "#ff6b6b"
+                }
+            }
+        ]
+    },
+    
+    // Workspace-specific snippets for safe operations
+    "editor.suggest.snippetsPreventQuickSuggestions": false,
+    
+    // Git settings for proper branch management
+    "git.defaultCloneDirectory": "./",
+    "git.confirmSync": true,
+    "git.enableSmartCommit": false,
+    
+    // Ruby/Rails specific settings
+    "ruby.intellisense": "rubyLsp",
+    "ruby.format": "rubocop",
+    
+    // YAML validation for environment configs
+    "yaml.validate": true,
+    "yaml.schemas": {
+        "./config/environments.yml": "config/environments.yml"
+    },
+    
+    // Exclude sensitive files from search
+    "search.exclude": {
+        "**/backup/**": true,
+        "**/debug/**": false,
+        "**/.env*": true,
+        "**/secrets/**": true
+    },
+    
+    // File watcher for critical files
+    "files.watcherExclude": {
+        "**/backup/**": false,
+        "**/debug/**": false
+    }
 }
