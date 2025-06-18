@@ -1,0 +1,233 @@
+name: Fresh Container Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'test'
+        type: choice
+        options:
+        - test
+        - staging
+        - production
+      container_name:
+        description: 'Container app name'
+        required: true
+        default: 'chatwoot-test-fresh'
+        type: string
+
+env:
+  AZURE_CONTAINER_REGISTRY: chatwootregistry95290.azurecr.io
+  RESOURCE_GROUP: SM-Test
+  IMAGE_TAG: ${{ github.sha }}
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Login to Azure Container Registry
+        run: |
+          az acr login --name chatwootregistry95290
+
+      - name: Build and Push Container Image
+        run: |
+          echo "Building fresh container image with tag: ${{ env.IMAGE_TAG }}"
+          
+          # Build the image with environment-specific configuration
+          docker build -t ${{ env.AZURE_CONTAINER_REGISTRY }}/chatwoot:${{ env.IMAGE_TAG }} \
+            --build-arg RAILS_ENV=${{ github.event.inputs.environment }} \
+            --build-arg BUILDTIME_ENV=${{ github.event.inputs.environment }} \
+            .
+          
+          # Push to registry
+          docker push ${{ env.AZURE_CONTAINER_REGISTRY }}/chatwoot:${{ env.IMAGE_TAG }}
+          
+          echo "Image pushed successfully: ${{ env.AZURE_CONTAINER_REGISTRY }}/chatwoot:${{ env.IMAGE_TAG }}"
+
+      - name: Delete Existing Container (if exists)
+        run: |
+          echo "Checking if container ${{ github.event.inputs.container_name }} exists..."
+          
+          if az containerapp show --name ${{ github.event.inputs.container_name }} --resource-group ${{ env.RESOURCE_GROUP }} > /dev/null 2>&1; then
+            echo "Container exists, deleting..."
+            az containerapp delete --name ${{ github.event.inputs.container_name }} --resource-group ${{ env.RESOURCE_GROUP }} --yes
+            echo "Container deleted successfully"
+            
+            # Wait for deletion to complete
+            echo "Waiting for deletion to complete..."
+            sleep 30
+          else
+            echo "Container does not exist, proceeding with fresh creation"
+          fi
+
+      - name: Create Fresh Container App
+        run: |
+          echo "Creating fresh container app: ${{ github.event.inputs.container_name }}"
+          
+          # Configure environment-specific settings
+          ENV_NAME="${{ github.event.inputs.environment }}"
+          
+          case $ENV_NAME in
+            "test")
+              DATABASE_NAME="chatwoot_shared"
+              DATABASE_SCHEMA="test"
+              RAILS_ENV="test"
+              ;;
+            "staging")
+              DATABASE_NAME="chatwoot_shared"
+              DATABASE_SCHEMA="staging"
+              RAILS_ENV="staging"
+              ;;
+            "production")
+              DATABASE_NAME="chatwoot_production"
+              DATABASE_SCHEMA="public"
+              RAILS_ENV="production"
+              ;;
+          esac
+          
+          # Build database URL
+          if [[ "$ENV_NAME" == "production" ]]; then
+            DATABASE_URL="postgresql://${{ secrets.DB_USERNAME }}:${{ secrets.DB_PASSWORD }}@${{ secrets.DB_HOST }}:5432/$DATABASE_NAME"
+          else
+            DATABASE_URL="postgresql://${{ secrets.DB_USERNAME }}:${{ secrets.DB_PASSWORD }}@${{ secrets.DB_HOST }}:5432/$DATABASE_NAME?options=-c%20search_path=$DATABASE_SCHEMA"
+          fi
+          
+          echo "Creating container with environment: $RAILS_ENV"
+          echo "Database: $DATABASE_NAME, Schema: $DATABASE_SCHEMA"
+          
+          # Create the container app with the fresh image
+          az containerapp create \
+            --name ${{ github.event.inputs.container_name }} \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --environment chatwoot-env-test \
+            --image ${{ env.AZURE_CONTAINER_REGISTRY }}/chatwoot:${{ env.IMAGE_TAG }} \
+            --registry-server ${{ env.AZURE_CONTAINER_REGISTRY }} \
+            --registry-username chatwootregistry95290 \
+            --registry-password ${{ secrets.ACR_PASSWORD }} \
+            --target-port 3000 \
+            --ingress external \
+            --min-replicas 1 \
+            --max-replicas 2 \
+            --cpu 0.75 \
+            --memory 1.5Gi \
+            --command "/bin/sh" \
+            --args "-c" "bundle exec rails db:prepare && bundle exec rails server -b 0.0.0.0 -p 3000" \
+            --env-vars \
+              RAILS_ENV="$RAILS_ENV" \
+              DATABASE_URL="$DATABASE_URL" \
+              REDIS_URL="${{ secrets.REDIS_URL }}" \
+              SECRET_KEY_BASE="${{ secrets.SECRET_KEY_BASE }}" \
+              FRONTEND_URL="https://${{ github.event.inputs.container_name }}.calmmushroom-30b1c815.eastus.azurecontainerapps.io" \
+              FORCE_SSL="false" \
+              RAILS_LOG_TO_STDOUT="true" \
+              ENABLE_ACCOUNT_SIGNUP="true" \
+              MAILER_SENDER_EMAIL="noreply@voicelinkllc.com" \
+              SMTP_DOMAIN="voicelinkllc.com" \
+              SIDEKIQ_CONCURRENCY="5"
+
+      - name: Wait for Container Startup
+        run: |
+          echo "Waiting for container to start up..."
+          CONTAINER_URL="https://${{ github.event.inputs.container_name }}.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          
+          # Wait for container to be accessible
+          for i in {1..20}; do
+            echo "Attempt $i: Testing container accessibility..."
+            
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$CONTAINER_URL" || echo "000")
+            echo "HTTP Status: $STATUS"
+            
+            if [[ "$STATUS" == "200" ]]; then
+              echo "✅ Container is accessible!"
+              
+              # Test health endpoint
+              HEALTH=$(curl -s "$CONTAINER_URL" || echo "failed")
+              echo "Health check response: $HEALTH"
+              break
+            elif [[ "$STATUS" == "502" || "$STATUS" == "503" ]]; then
+              echo "⏳ Container starting up (Status: $STATUS)..."
+            else
+              echo "❌ Unexpected status: $STATUS"
+            fi
+            
+            sleep 15
+          done
+
+      - name: Verify Environment Configuration
+        run: |
+          echo "Verifying environment configuration..."
+          CONTAINER_URL="https://${{ github.event.inputs.container_name }}.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          
+          # Test basic accessibility
+          echo "1. Testing basic accessibility..."
+          BASIC_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$CONTAINER_URL" || echo "000")
+          echo "Basic access status: $BASIC_STATUS"
+          
+          # Test API endpoints
+          echo "2. Testing API endpoints..."
+          API_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$CONTAINER_URL/api" || echo "000")
+          echo "API status: $API_STATUS"
+          
+          # Test Platform API
+          echo "3. Testing Platform API..."
+          PLATFORM_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$CONTAINER_URL/platform/api/v1/accounts" || echo "000")
+          echo "Platform API status: $PLATFORM_STATUS"
+          
+          if [[ "$PLATFORM_STATUS" == "401" ]]; then
+            echo "✅ Platform API is working correctly (401 - auth required)"
+          elif [[ "$PLATFORM_STATUS" == "404" ]]; then
+            echo "❌ Platform API not found (404 - routes not loaded)"
+          else
+            echo "? Platform API status: $PLATFORM_STATUS"
+          fi
+          
+          # Test super admin access
+          echo "4. Testing super admin access..."
+          ADMIN_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$CONTAINER_URL/super_admin" || echo "000")
+          echo "Super admin status: $ADMIN_STATUS"
+
+      - name: Setup VoiceLinkAI Integration
+        if: github.event.inputs.environment == 'test'
+        run: |
+          echo "Setting up VoiceLinkAI integration for test environment..."
+          CONTAINER_URL="https://${{ github.event.inputs.container_name }}.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          
+          # Check if Platform API is available
+          PLATFORM_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$CONTAINER_URL/platform/api/v1/accounts" || echo "000")
+          
+          if [[ "$PLATFORM_STATUS" == "401" ]]; then
+            echo "✅ Platform API available - ready for VoiceLinkAI setup"
+            echo "Next steps:"
+            echo "1. Create Platform App through super admin interface"
+            echo "2. Use Platform API to create VoiceLinkAI account"
+            echo "3. Generate required tokens for integration"
+            echo ""
+            echo "Container URL: $CONTAINER_URL"
+            echo "Super Admin: $CONTAINER_URL/super_admin"
+            echo "Platform API: $CONTAINER_URL/platform/api/v1/accounts"
+          else
+            echo "❌ Platform API not ready (Status: $PLATFORM_STATUS)"
+            echo "Manual setup may be required"
+          fi
+
+      - name: Output Results
+        run: |
+          echo "=== DEPLOYMENT SUMMARY ==="
+          echo "Environment: ${{ github.event.inputs.environment }}"
+          echo "Container: ${{ github.event.inputs.container_name }}"
+          echo "Image: ${{ env.AZURE_CONTAINER_REGISTRY }}/chatwoot:${{ env.IMAGE_TAG }}"
+          echo "URL: https://${{ github.event.inputs.container_name }}.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          echo ""
+          echo "✅ Fresh container deployment completed!"
+          echo "This bypasses Azure Container Apps environment variable caching issues"
+          echo "by creating a completely new container with the correct configuration." 
