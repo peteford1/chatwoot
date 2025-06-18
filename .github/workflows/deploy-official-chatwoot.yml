@@ -1,0 +1,124 @@
+name: Deploy Official Chatwoot to Test Environment
+
+on:
+  workflow_dispatch:
+    inputs:
+      container_name:
+        description: 'Container app name'
+        required: true
+        default: 'chatwoot-test-official-v2'
+
+env:
+  AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+  RESOURCE_GROUP: SM-Test
+  ENVIRONMENT: chatwoot-environment
+  LOCATION: eastus
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Deploy Chatwoot Container App
+      run: |
+        # Create container app with official Chatwoot image
+        az containerapp create \
+          --name ${{ github.event.inputs.container_name }} \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --environment ${{ env.ENVIRONMENT }} \
+          --image chatwoot/chatwoot:latest \
+          --target-port 3000 \
+          --ingress external \
+          --min-replicas 1 \
+          --max-replicas 1 \
+          --cpu 1.0 \
+          --memory 2.0Gi \
+          --env-vars \
+            RAILS_ENV=test \
+            RACK_ENV=test \
+            NODE_ENV=test \
+            POSTGRES_HOST=${{ secrets.DB_HOST }} \
+            POSTGRES_USERNAME=${{ secrets.DB_USERNAME }} \
+            POSTGRES_PASSWORD=${{ secrets.DB_PASSWORD }} \
+            POSTGRES_DATABASE=chatwoot_shared \
+            POSTGRES_PORT=5432 \
+            DATABASE_URL="postgresql://${{ secrets.DB_USERNAME }}:${{ secrets.DB_PASSWORD }}@${{ secrets.DB_HOST }}:5432/chatwoot_shared?sslmode=require&pool=25" \
+            REDIS_URL=${{ secrets.REDIS_URL }} \
+            SECRET_KEY_BASE=${{ secrets.SECRET_KEY_BASE }} \
+            FRONTEND_URL="https://${{ github.event.inputs.container_name }}.calmmushroom-30b1c815.eastus.azurecontainerapps.io" \
+            FORCE_SSL=false \
+            RAILS_LOG_TO_STDOUT=true \
+            RAILS_SERVE_STATIC_FILES=true
+
+    - name: Wait for container to be ready
+      run: |
+        echo "Waiting for container to start..."
+        sleep 60
+        
+        # Check if container is running
+        STATUS=$(az containerapp show --name ${{ github.event.inputs.container_name }} --resource-group ${{ env.RESOURCE_GROUP }} --query "properties.runningStatus" -o tsv)
+        echo "Container status: $STATUS"
+        
+        if [ "$STATUS" != "Running" ]; then
+          echo "Container is not running. Status: $STATUS"
+          exit 1
+        fi
+
+    - name: Initialize Database
+      run: |
+        echo "Initializing database with rails db:chatwoot_prepare..."
+        
+        # Run the official Chatwoot database preparation command
+        az containerapp exec \
+          --name ${{ github.event.inputs.container_name }} \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --command "bundle exec rails db:chatwoot_prepare" || {
+          
+          echo "Database preparation failed. Checking logs..."
+          az containerapp logs show \
+            --name ${{ github.event.inputs.container_name }} \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --tail 50
+          exit 1
+        }
+
+    - name: Verify Deployment
+      run: |
+        # Get the application URL
+        APP_URL=$(az containerapp show \
+          --name ${{ github.event.inputs.container_name }} \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --query "properties.configuration.ingress.fqdn" -o tsv)
+        
+        echo "Application URL: https://$APP_URL"
+        
+        # Test the health endpoint
+        echo "Testing health endpoint..."
+        curl -f "https://$APP_URL/health" || {
+          echo "Health check failed. Checking logs..."
+          az containerapp logs show \
+            --name ${{ github.event.inputs.container_name }} \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --tail 50
+          exit 1
+        }
+        
+        echo "✅ Deployment successful!"
+        echo "🌐 Access your Chatwoot instance at: https://$APP_URL"
+
+    - name: Show Container Logs
+      if: always()
+      run: |
+        echo "=== Container Logs ==="
+        az containerapp logs show \
+          --name ${{ github.event.inputs.container_name }} \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --tail 100 
