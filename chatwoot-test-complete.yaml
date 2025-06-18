@@ -1,0 +1,67 @@
+location: eastus
+resourceGroup: SM-Test
+properties:
+  environmentId: /subscriptions/535e2aa8-27e9-4d89-9208-be446ef89b87/resourceGroups/SM-Test/providers/Microsoft.App/managedEnvironments/chatwoot-env-test
+  configuration:
+    ingress:
+      external: true
+      targetPort: 3000
+      traffic:
+      - weight: 100
+        latestRevision: true
+  template:
+    containers:
+    - name: chatwoot-backend
+      image: chatwoot/chatwoot:latest
+      env:
+      - name: RAILS_ENV
+        value: production
+      - name: DATABASE_URL
+        value: postgresql://chatwootuser:ChatwootSecure2025!@chatwoot-db-fresh.postgres.database.azure.com:5432/chatwoot_shared?sslmode=require
+      - name: REDIS_URL
+        value: redis://localhost:6379
+      - name: SECRET_KEY_BASE
+        value: bb02bd4083fc907af6a7857e937af9067e1c68fde8995e90186545bb34e945f1
+      - name: FRONTEND_URL
+        value: https://chatwoot-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io
+      - name: FORCE_SSL
+        value: "false"
+      - name: RAILS_LOG_TO_STDOUT
+        value: "true"
+      - name: RAILS_SERVE_STATIC_FILES
+        value: "true"
+      - name: MAILER_SENDER_EMAIL
+        value: admin@voicelinkai.com
+      - name: ENABLE_ACCOUNT_SIGNUP
+        value: "false"
+      - name: INSTALLATION_NAME
+        value: VoiceLink AI Chatwoot
+      - name: POSTGRES_HOST
+        value: chatwoot-db-fresh.postgres.database.azure.com
+      - name: POSTGRES_USERNAME
+        value: chatwootuser
+      - name: POSTGRES_PASSWORD
+        value: ChatwootSecure2025!
+      - name: POSTGRES_DATABASE
+        value: chatwoot_shared
+      - name: POSTGRES_PORT
+        value: "5432"
+      resources:
+        cpu: 1.0
+        memory: 2.0Gi
+    - name: redis
+      image: redis:7-alpine
+      command:
+      - redis-server
+      - --appendonly
+      - "yes"
+      - --maxmemory
+      - 256mb
+      - --maxmemory-policy
+      - allkeys-lru
+      resources:
+        cpu: 0.25
+        memory: 0.5Gi
+    scale:
+      minReplicas: 1
+      maxReplicas: 1 

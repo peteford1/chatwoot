@@ -1,0 +1,140 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: chatwoot-postgres-local
+    environment:
+      POSTGRES_DB: chatwoot_development
+      POSTGRES_USER: chatwootuser
+      POSTGRES_PASSWORD: ChatwootLocal2025!
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U chatwootuser -d chatwoot_development"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: chatwoot-redis-local
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Chatwoot Backend (Built from local Dockerfile)
+  chatwoot:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    container_name: chatwoot-backend-local
+    ports:
+      - "3000:3000"
+    environment:
+      # Rails Configuration
+      RAILS_ENV: development
+      NODE_ENV: development
+      RAILS_LOG_TO_STDOUT: "true"
+      
+      # Database Configuration
+      DATABASE_URL: postgresql://chatwootuser:ChatwootLocal2025!@postgres:5432/chatwoot_development
+      
+      # Redis Configuration
+      REDIS_URL: redis://redis:6379
+      
+      # Application Configuration
+      SECRET_KEY_BASE: local_development_secret_key_base_12345678901234567890123456789012345678901234567890
+      FRONTEND_URL: http://localhost:3000
+      FORCE_SSL: "false"
+      
+      # Feature Flags
+      CW_API_ONLY_SERVER: "true"
+      ENABLE_ACCOUNT_SIGNUP: "true"
+      SKIP_DATABASE_CREATION: "false"
+      SKIP_ASSET_PRECOMPILE: "true"
+      
+      # Email Configuration (Optional for local)
+      MAILER_SENDER_EMAIL: admin@localhost
+      SMTP_DOMAIN: localhost
+      
+      # Performance
+      SIDEKIQ_CONCURRENCY: "3"
+      WEB_CONCURRENCY: "2"
+      
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./log:/app/log
+      - ./tmp:/app/tmp
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
+
+  # Sidekiq Worker (Optional for local testing)
+  sidekiq:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    container_name: chatwoot-sidekiq-local
+    command: bundle exec sidekiq -C config/sidekiq.yml
+    environment:
+      RAILS_ENV: development
+      DATABASE_URL: postgresql://chatwootuser:ChatwootLocal2025!@postgres:5432/chatwoot_development
+      REDIS_URL: redis://redis:6379
+      SECRET_KEY_BASE: local_development_secret_key_base_12345678901234567890123456789012345678901234567890
+      RAILS_LOG_TO_STDOUT: "true"
+      SIDEKIQ_CONCURRENCY: "3"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      chatwoot:
+        condition: service_started
+    volumes:
+      - ./log:/app/log
+
+  # KrakenD Gateway (Optional for full stack testing)
+  krakend:
+    build:
+      context: ./krakend
+      dockerfile: Dockerfile
+    container_name: chatwoot-krakend-local
+    ports:
+      - "8080:8080"
+    environment:
+      FC_ENABLE: 1
+      FC_OUT: /tmp
+      FC_PARTIALS: /etc/krakend/partials
+      FC_SETTINGS: /etc/krakend/settings
+      FC_TEMPLATES: /etc/krakend/templates
+    depends_on:
+      - chatwoot
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/__health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  postgres_data:
+  redis_data: 

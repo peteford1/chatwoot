@@ -1,0 +1,30 @@
+FROM chatwoot/chatwoot:latest
+
+# Install Redis CLI and other tools for debugging
+RUN apk add --no-cache \
+    redis \
+    postgresql-client \
+    curl \
+    netcat-openbsd \
+    bash
+
+# Copy custom startup script
+COPY docker/scripts/chatwoot-redis-start.sh /usr/local/bin/chatwoot-redis-start.sh
+RUN chmod +x /usr/local/bin/chatwoot-redis-start.sh
+
+# Copy health check script
+COPY docker/scripts/health-check.sh /usr/local/bin/health-check.sh
+RUN chmod +x /usr/local/bin/health-check.sh
+
+# Set working directory
+WORKDIR /app
+
+# Expose port 3000
+EXPOSE 3000
+
+# Enhanced health check that validates Redis connection
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD /usr/local/bin/health-check.sh
+
+# Use the enhanced startup script
+CMD ["/usr/local/bin/chatwoot-redis-start.sh"] 

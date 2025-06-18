@@ -104,8 +104,8 @@ jobs:
             --image chatwoot/chatwoot:latest \
             --target-port 3000 \
             --ingress external \
-            --min-replicas 1 \
-            --max-replicas 2 \
+                      --min-replicas 0 \
+          --max-replicas 1 \
             --cpu 0.75 \
             --memory 1.5Gi \
             --command "bundle" \

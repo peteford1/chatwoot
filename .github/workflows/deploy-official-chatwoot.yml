@@ -37,7 +37,7 @@ jobs:
           --image chatwoot/chatwoot:latest \
           --target-port 3000 \
           --ingress external \
-          --min-replicas 1 \
+          --min-replicas 0 \
           --max-replicas 1 \
           --cpu 1.0 \
           --memory 2.0Gi \

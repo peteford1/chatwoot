@@ -1,0 +1,159 @@
+# Azure Container App Environment Configurations
+# Cost-optimized resource allocation strategy
+
+environments:
+  development:
+    name: chatwoot-backend-test
+    resource_group: SM-Test
+    environment: chatwoot-dev-env
+    cpu: 0.5
+    memory: 1.0Gi
+    min_replicas: 0  # Scale to zero for cost savings
+    max_replicas: 2
+    workload_profile: "Consumption"  # Burstable instance type
+    scaling_rules:
+      - name: "http-rule"
+        http:
+          concurrent_requests: 30
+    ingress:
+      external: true
+      target_port: 3000
+    secrets:
+      - name: database-url
+        value: "postgresql://chatwoot_dev@chatwoot-db-fresh:PASSWORD@chatwoot-db-fresh.postgres.database.azure.com:5432/chatwoot_shared"
+      - name: redis-url
+        value: "redis://redis-shared.calmmushroom-30b1c815.eastus.azurecontainerapps.io:6379"
+    env_vars:
+      - name: RAILS_ENV
+        value: development
+      - name: NODE_ENV
+        value: development
+      - name: FRONTEND_URL
+        value: "https://chatwoot-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+
+  test:
+    name: chatwoot-backend-test
+    resource_group: SM-Test
+    environment: chatwoot-test-env
+    cpu: 0.5
+    memory: 1.0Gi
+    min_replicas: 0  # Scale to zero for cost savings
+    max_replicas: 2
+    workload_profile: "Consumption"  # Burstable instance type
+    scaling_rules:
+      - name: "http-rule"
+        http:
+          concurrent_requests: 30
+    ingress:
+      external: true
+      target_port: 3000
+    secrets:
+      - name: database-url
+        value: "postgresql://chatwoot_test@chatwoot-db-fresh:PASSWORD@chatwoot-db-fresh.postgres.database.azure.com:5432/chatwoot_shared"
+      - name: redis-url
+        value: "redis://redis-shared.calmmushroom-30b1c815.eastus.azurecontainerapps.io:6379"
+    env_vars:
+      - name: RAILS_ENV
+        value: test
+      - name: NODE_ENV
+        value: test
+      - name: FRONTEND_URL
+        value: "https://chatwoot-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+
+  staging:
+    name: chatwoot-backend-staging
+    resource_group: SM-Test
+    environment: chatwoot-staging-env
+    cpu: 0.5
+    memory: 1.0Gi
+    min_replicas: 1  # Always one instance for staging
+    max_replicas: 3
+    workload_profile: "Consumption"  # Burstable instance type
+    scaling_rules:
+      - name: "http-rule"
+        http:
+          concurrent_requests: 50
+    ingress:
+      external: true
+      target_port: 3000
+    secrets:
+      - name: database-url
+        value: "postgresql://chatwoot_staging@chatwoot-db-fresh:PASSWORD@chatwoot-db-fresh.postgres.database.azure.com:5432/chatwoot_staging"
+      - name: redis-url
+        value: "redis://redis-shared.calmmushroom-30b1c815.eastus.azurecontainerapps.io:6379"
+    env_vars:
+      - name: RAILS_ENV
+        value: staging
+      - name: NODE_ENV
+        value: staging
+      - name: FRONTEND_URL
+        value: "https://chatwoot-staging.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+
+  production:
+    name: chatwoot-backend-prod
+    resource_group: SM-Production  # Separate resource group for production
+    environment: chatwoot-prod-env
+    cpu: 2.0
+    memory: 4.0Gi
+    min_replicas: 2  # Always running for production
+    max_replicas: 10
+    workload_profile: "Dedicated"  # Dedicated instance type for production
+    scaling_rules:
+      - name: "http-rule"
+        http:
+          concurrent_requests: 100
+      - name: "cpu-rule"
+        custom:
+          type: "cpu"
+          metadata:
+            type: "Utilization"
+            value: "70"
+    ingress:
+      external: true
+      target_port: 3000
+    secrets:
+      - name: database-url
+        value: "postgresql://chatwoot_prod@chatwoot-db-prod:PASSWORD@chatwoot-db-prod.postgres.database.azure.com:5432/chatwoot_production"
+      - name: redis-url
+        value: "redis://redis-prod.calmmushroom-30b1c815.eastus.azurecontainerapps.io:6379"
+    env_vars:
+      - name: RAILS_ENV
+        value: production
+      - name: NODE_ENV
+        value: production
+      - name: FRONTEND_URL
+        value: "https://chatwoot-prod.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+
+# KrakenD Gateway Configuration
+krakend:
+  development:
+    name: voicelinkai-gateway-dev
+    cpu: 0.25
+    memory: 0.5Gi
+    min_replicas: 1
+    max_replicas: 2
+    workload_profile: "Consumption"  # Burstable for cost savings
+  
+  test:
+    name: voicelinkai-gateway-test
+    cpu: 0.25
+    memory: 0.5Gi
+    min_replicas: 1
+    max_replicas: 2
+    workload_profile: "Consumption"  # Burstable for cost savings
+    
+  staging:
+    name: voicelinkai-gateway-staging
+    cpu: 0.5
+    memory: 1.0Gi
+    min_replicas: 1
+    max_replicas: 3
+    workload_profile: "Consumption"  # Burstable for cost savings
+    
+  production:
+    name: voicelinkai-gateway-prod
+    cpu: 1.0
+    memory: 2.0Gi
+    min_replicas: 2
+    max_replicas: 5
+    workload_profile: "Dedicated"  # Dedicated for production performance 

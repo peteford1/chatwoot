@@ -1,0 +1,37 @@
+properties:
+  template:
+    containers:
+    - name: chatwoot-test
+      image: chatwoot/chatwoot:latest
+      command: ["/bin/bash"]
+      args: ["-c", "bundle exec rails db:prepare && bundle exec rails server -b 0.0.0.0 -p 3000"]
+      env:
+      - name: RAILS_ENV
+        value: production
+      - name: CW_API_ONLY_SERVER
+        value: "true"
+      - name: DATABASE_URL
+        value: postgresql://chatwootuser:ChatwootSecure2025!@chatwoot-db-fresh.postgres.database.azure.com:5432/chatwoot_shared?sslmode=require
+      - name: REDIS_URL
+        value: redis://redis-shared.internal.calmmushroom-30b1c815.eastus.azurecontainerapps.io:6379
+      - name: SECRET_KEY_BASE
+        value: bb02bd4083fc907af6a7857e937af9067e1c68fde8995e90186545bb34e945f1
+      - name: FRONTEND_URL
+        value: https://chatwoot-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io
+      - name: FORCE_SSL
+        value: "false"
+      - name: RAILS_LOG_TO_STDOUT
+        value: "true"
+      - name: MAILER_SENDER_EMAIL
+        value: admin@voicelinkai.com
+      - name: SMTP_DOMAIN
+        value: voicelinkai.com
+      - name: ENABLE_ACCOUNT_SIGNUP
+        value: "false"
+      - name: SKIP_DATABASE_CREATION
+        value: "false"
+      - name: SIDEKIQ_CONCURRENCY
+        value: "5"
+      resources:
+        cpu: 0.75
+        memory: 1.5Gi 

@@ -143,6 +143,15 @@ class EnvironmentManager
     puts "🚀 Creating Container App: #{app_name}"
     puts "=" * 50
     
+    # Set replica configuration based on environment
+    if env_name == 'production'
+      min_replicas = 1
+      max_replicas = 3
+    else
+      min_replicas = 0
+      max_replicas = 1
+    end
+    
     # Generate az containerapp create command
     cmd = [
       "az containerapp create",
@@ -152,8 +161,8 @@ class EnvironmentManager
       "--image #{azure_config['container_registry']}/chatwoot:latest",
       "--target-port 3000",
       "--ingress external",
-      "--min-replicas 1",
-      "--max-replicas 3",
+      "--min-replicas #{min_replicas}",
+      "--max-replicas #{max_replicas}",
       "--cpu 1.0",
       "--memory 2Gi"
     ].join(" \\\n  ")

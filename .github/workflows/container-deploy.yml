@@ -1,0 +1,183 @@
+name: Build and Deploy Container Images
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  REGISTRY: voicelinkregistry.azurecr.io
+  CHATWOOT_IMAGE_NAME: chatwoot-backend
+  KRAKEND_IMAGE_NAME: krakend-gateway
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    outputs:
+      chatwoot-image: ${{ steps.meta.outputs.tags }}
+      krakend-image: ${{ steps.krakend-meta.outputs.tags }}
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Log in to Azure Container Registry
+      uses: azure/docker-login@v1
+      with:
+        login-server: ${{ env.REGISTRY }}
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
+
+    # Build Chatwoot Backend Image
+    - name: Extract Chatwoot metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.CHATWOOT_IMAGE_NAME }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
+
+    - name: Build and push Chatwoot image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./docker/Dockerfile.backend
+        platforms: linux/amd64
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        build-args: |
+          RAILS_ENV=production
+          NODE_ENV=production
+
+    # Build KrakenD Gateway Image
+    - name: Extract KrakenD metadata
+      id: krakend-meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.KRAKEND_IMAGE_NAME }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
+
+    - name: Build and push KrakenD image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./krakend
+        file: ./krakend/Dockerfile
+        platforms: linux/amd64
+        push: true
+        tags: ${{ steps.krakend-meta.outputs.tags }}
+        labels: ${{ steps.krakend-meta.outputs.labels }}
+
+  deploy-development:
+    if: github.ref == 'refs/heads/develop'
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment: development
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Deploy to Development Environment
+      run: |
+        # Install yq for YAML parsing
+        sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+        sudo chmod +x /usr/local/bin/yq
+        
+        # Use environment-aware deployment script with AMD64 and cost-optimized resources
+        chmod +x ./scripts/deploy-environment.sh
+        ./scripts/deploy-environment.sh development
+
+    - name: Update KrakenD Configuration and Deploy
+      run: |
+        # Install jq for JSON manipulation
+        sudo apt-get update && sudo apt-get install -y jq
+        
+        # Make scripts executable
+        chmod +x ./scripts/update-krakend-config.sh
+        
+        # Update KrakenD configuration for development environment
+        ./scripts/update-krakend-config.sh development config-only
+        
+        # Build and push updated KrakenD image
+        KRAKEND_DEV_TAG="${{ needs.build-and-push.outputs.krakend-image }}-dev-$(date +%Y%m%d-%H%M%S)"
+        docker build -t $KRAKEND_DEV_TAG ./krakend/
+        docker push $KRAKEND_DEV_TAG
+        
+        # Update KrakenD Gateway Container with new config
+        az containerapp update \
+          --name voicelinkai-gateway-instance-v32 \
+          --resource-group SM-Test \
+          --image $KRAKEND_DEV_TAG
+
+    - name: Verify Deployment
+      run: |
+        echo "Waiting for deployment to complete..."
+        sleep 60
+        
+        # Check Chatwoot health
+        curl -f https://chatwoot-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io/health || exit 1
+        
+        # Check KrakenD health
+        curl -f http://voicelinkai.com/__health || exit 1
+        
+        # Check environment-specific routing
+        curl -f http://voicelinkai.com/dev/health || exit 1
+        
+        echo "✅ Development deployment successful!"
+
+  deploy-production:
+    if: github.ref == 'refs/heads/main'
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Deploy to Production Environment
+      run: |
+        # Install yq for YAML parsing
+        sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+        sudo chmod +x /usr/local/bin/yq
+        
+        # Use environment-aware deployment script with AMD64 and production resources (2 CPU, 4GB)
+        chmod +x ./scripts/deploy-environment.sh
+        ./scripts/deploy-environment.sh production
+
+  security-scan:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: ${{ needs.build-and-push.outputs.chatwoot-image }}
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif' 

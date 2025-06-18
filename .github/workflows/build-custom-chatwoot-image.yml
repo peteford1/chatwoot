@@ -1,0 +1,127 @@
+name: Build Custom Chatwoot Docker Image
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag_version:
+        description: 'Docker image tag version'
+        required: true
+        default: 'latest-redis'
+      push_to_registry:
+        description: 'Push to Azure Container Registry'
+        required: true
+        default: true
+        type: boolean
+
+env:
+  REGISTRY: voicelinkregistry.azurecr.io
+  IMAGE_NAME: chatwoot-redis
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    name: Build Custom Chatwoot Image
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Login to Azure Container Registry
+      run: |
+        az acr login --name voicelinkregistry
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Make scripts executable
+      run: |
+        chmod +x docker/scripts/chatwoot-redis-start.sh
+        chmod +x docker/scripts/health-check.sh
+
+    - name: Build Docker image
+      run: |
+        docker build \
+          -f docker/Dockerfile.chatwoot-redis \
+          -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.inputs.tag_version }} \
+          -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
+          .
+
+    - name: Test Docker image
+      run: |
+        echo "🧪 Testing Docker image..."
+        
+        # Start a test container with minimal environment
+        docker run -d \
+          --name chatwoot-test \
+          -e RAILS_ENV=test \
+          -e SECRET_KEY_BASE=test_secret_key_base_12345678901234567890123456789012345678901234567890 \
+          -e SKIP_DATABASE_CREATION=true \
+          -e SKIP_ASSET_PRECOMPILE=true \
+          -p 3001:3000 \
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.inputs.tag_version }}
+        
+        # Wait for container to start
+        sleep 10
+        
+        # Check if container is running
+        if docker ps | grep -q chatwoot-test; then
+          echo "✅ Container started successfully"
+        else
+          echo "❌ Container failed to start"
+          docker logs chatwoot-test
+          exit 1
+        fi
+        
+        # Clean up test container
+        docker stop chatwoot-test
+        docker rm chatwoot-test
+
+    - name: Push to Azure Container Registry
+      if: github.event.inputs.push_to_registry == 'true'
+      run: |
+        echo "🚀 Pushing images to Azure Container Registry..."
+        
+        docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.inputs.tag_version }}
+        docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+        
+        echo "✅ Images pushed successfully!"
+
+    - name: Show image details
+      run: |
+        echo "🎯 Custom Chatwoot Image Built!"
+        echo "================================"
+        echo "📍 Registry: ${{ env.REGISTRY }}"
+        echo "🏷️ Image: ${{ env.IMAGE_NAME }}"
+        echo "🔖 Tag: ${{ github.event.inputs.tag_version }}"
+        echo "🌐 Full Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.inputs.tag_version }}"
+        echo ""
+        echo "🔧 Features:"
+        echo "   • Enhanced Redis connectivity checks"
+        echo "   • Improved health monitoring"
+        echo "   • Better startup sequence"
+        echo "   • Database connection validation"
+        echo "   • Comprehensive logging"
+        echo ""
+        echo "📋 Usage in deployment:"
+        echo "   Replace 'chatwoot/chatwoot:latest' with:"
+        echo "   '${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.inputs.tag_version }}'"
+
+    - name: Update deployment workflows
+      if: github.event.inputs.push_to_registry == 'true'
+      run: |
+        echo "💡 Next steps:"
+        echo "1. Update deployment workflows to use the new image"
+        echo "2. Test deployments with Redis sidecar configuration"
+        echo "3. Monitor application startup and health checks"
+        echo ""
+        echo "🔄 To use this image in deployments, update:"
+        echo "   • .github/workflows/deploy-chatwoot-with-redis.yml"
+        echo "   • Any other deployment workflows"
+        echo ""
+        echo "Replace image references with:"
+        echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.inputs.tag_version }}" 

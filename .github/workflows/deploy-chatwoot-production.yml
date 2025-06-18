@@ -183,21 +183,48 @@ jobs:
           --resource-group ${{ env.RESOURCE_GROUP }} \
           --yes
 
-    - name: Deploy Chatwoot Container App
+    - name: Set replica configuration based on environment
+      id: replica_config
       run: |
+        if [ "${{ github.event.inputs.environment }}" = "production" ]; then
+          echo "min_replicas=1" >> $GITHUB_OUTPUT
+          echo "max_replicas=3" >> $GITHUB_OUTPUT
+        else
+          echo "min_replicas=0" >> $GITHUB_OUTPUT
+          echo "max_replicas=1" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Deploy Chatwoot Container App with Redis Sidecar
+      run: |
+        # Create container app with Redis sidecar using YAML
         az containerapp create \
           --name ${{ github.event.inputs.container_name }} \
           --resource-group ${{ env.RESOURCE_GROUP }} \
           --environment ${{ env.CONTAINER_ENV }} \
-          --image chatwoot/chatwoot:latest \
-          --target-port 3000 \
-          --ingress external \
-          --min-replicas 1 \
-          --max-replicas 2 \
-          --cpu 1.0 \
-          --memory 2.0Gi \
-          --env-vars \
-            RAILS_ENV=production \
+          --yaml /dev/stdin <<EOF
+        location: ${{ env.LOCATION }}
+        resourceGroup: ${{ env.RESOURCE_GROUP }}
+        properties:
+          environmentId: /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/${{ env.RESOURCE_GROUP }}/providers/Microsoft.App/managedEnvironments/${{ env.CONTAINER_ENV }}
+          configuration:
+            ingress:
+              external: true
+              targetPort: 3000
+              traffic:
+              - weight: 100
+                latestRevision: true
+          template:
+            containers:
+            - name: chatwoot-backend
+              image: chatwoot/chatwoot:latest
+              command:
+              - /bin/sh
+              args:
+              - -c
+              - bundle exec rails db:prepare && bundle exec rails server -b 0.0.0.0 -p 3000
+              env:
+              - name: RAILS_ENV
+                value: production \
             SECRET_KEY_BASE="${{ secrets.SECRET_KEY_BASE }}" \
             POSTGRES_HOST="${{ secrets.DB_HOST }}" \
             POSTGRES_USERNAME="${{ secrets.DB_USERNAME }}" \
