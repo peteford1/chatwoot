@@ -1,0 +1,257 @@
+name: Deploy Chatwoot to Azure Container Apps
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'test'
+        type: choice
+        options:
+          - test
+          - staging
+          - production
+      container_name:
+        description: 'Container app name'
+        required: true
+        default: 'chatwoot-automated'
+
+env:
+  AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+  RESOURCE_GROUP: SM-Test
+  LOCATION: eastus
+  CONTAINER_ENV: chatwoot-env-test
+
+jobs:
+  prepare-database:
+    runs-on: ubuntu-latest
+    name: Prepare Database
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.2'
+        bundler-cache: true
+
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Install PostgreSQL client
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y postgresql-client
+
+    - name: Test Database Connection
+      run: |
+        PGPASSWORD="${{ secrets.DB_PASSWORD }}" psql \
+          -h ${{ secrets.DB_HOST }} \
+          -U ${{ secrets.DB_USERNAME }} \
+          -d chatwoot_shared \
+          -c "SELECT current_database(), current_user;"
+
+    - name: Check if database is already prepared
+      id: check_db
+      run: |
+        TABLE_COUNT=$(PGPASSWORD="${{ secrets.DB_PASSWORD }}" psql \
+          -h ${{ secrets.DB_HOST }} \
+          -U ${{ secrets.DB_USERNAME }} \
+          -d chatwoot_shared \
+          -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';")
+        echo "table_count=$TABLE_COUNT" >> $GITHUB_OUTPUT
+        echo "Database has $TABLE_COUNT tables"
+
+    - name: Prepare Chatwoot Database
+      if: steps.check_db.outputs.table_count < 50
+      env:
+        RAILS_ENV: production
+        SECRET_KEY_BASE: ${{ secrets.SECRET_KEY_BASE }}
+        POSTGRES_HOST: ${{ secrets.DB_HOST }}
+        POSTGRES_USERNAME: ${{ secrets.DB_USERNAME }}
+        POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        POSTGRES_DATABASE: chatwoot_shared
+        POSTGRES_PORT: 5432
+      run: |
+        echo "Database needs preparation (only ${{ steps.check_db.outputs.table_count }} tables found)"
+        bundle exec rails db:chatwoot_prepare
+
+    - name: Verify Database Preparation
+      run: |
+        FINAL_COUNT=$(PGPASSWORD="${{ secrets.DB_PASSWORD }}" psql \
+          -h ${{ secrets.DB_HOST }} \
+          -U ${{ secrets.DB_USERNAME }} \
+          -d chatwoot_shared \
+          -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';")
+        echo "Database preparation complete. Final table count: $FINAL_COUNT"
+        if [ "$FINAL_COUNT" -lt 50 ]; then
+          echo "Error: Database preparation failed. Expected at least 50 tables, got $FINAL_COUNT"
+          exit 1
+        fi
+
+  deploy-container:
+    runs-on: ubuntu-latest
+    needs: prepare-database
+    name: Deploy Container App
+    
+    steps:
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Delete existing container if exists
+      continue-on-error: true
+      run: |
+        az containerapp delete \
+          --name ${{ github.event.inputs.container_name }} \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --yes
+
+    - name: Deploy Chatwoot Container App
+      run: |
+        az containerapp create \
+          --name ${{ github.event.inputs.container_name }} \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --environment ${{ env.CONTAINER_ENV }} \
+          --image chatwoot/chatwoot:latest \
+          --target-port 3000 \
+          --ingress external \
+          --min-replicas 1 \
+          --max-replicas 2 \
+          --cpu 1.0 \
+          --memory 2.0Gi \
+          --env-vars \
+            RAILS_ENV=production \
+            SECRET_KEY_BASE="${{ secrets.SECRET_KEY_BASE }}" \
+            POSTGRES_HOST="${{ secrets.DB_HOST }}" \
+            POSTGRES_USERNAME="${{ secrets.DB_USERNAME }}" \
+            POSTGRES_PASSWORD="${{ secrets.DB_PASSWORD }}" \
+            POSTGRES_DATABASE=chatwoot_shared \
+            POSTGRES_PORT=5432 \
+            REDIS_URL="${{ secrets.REDIS_URL }}" \
+            FRONTEND_URL="https://${{ github.event.inputs.container_name }}.calmmushroom-30b1c815.eastus.azurecontainerapps.io" \
+            ACTIVE_STORAGE_SERVICE=local \
+            RAILS_LOG_TO_STDOUT=true \
+            RAILS_SERVE_STATIC_FILES=true \
+            MAILER_SENDER_EMAIL=admin@voicelinkai.com \
+            INSTALLATION_NAME="VoiceLink AI Chatwoot" \
+            ENABLE_ACCOUNT_SIGNUP=false
+
+    - name: Wait for container to be ready
+      run: |
+        echo "Waiting for container to start..."
+        sleep 120
+
+    - name: Get container URL
+      id: get_url
+      run: |
+        CONTAINER_URL=$(az containerapp show \
+          --name ${{ github.event.inputs.container_name }} \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --query "properties.configuration.ingress.fqdn" \
+          --output tsv)
+        echo "container_url=https://$CONTAINER_URL" >> $GITHUB_OUTPUT
+        echo "Container deployed at: https://$CONTAINER_URL"
+
+    - name: Test deployment
+      run: |
+        echo "Testing deployment at ${{ steps.get_url.outputs.container_url }}"
+        
+        # Test main endpoint
+        for i in {1..10}; do
+          echo "Attempt $i: Testing main endpoint..."
+          if curl -f -s "${{ steps.get_url.outputs.container_url }}/" > /dev/null; then
+            echo "✅ Main endpoint is responding"
+            break
+          elif [ $i -eq 10 ]; then
+            echo "⚠️  Main endpoint not responding after 10 attempts"
+          else
+            echo "Waiting 30 seconds before retry..."
+            sleep 30
+          fi
+        done
+        
+        # Test API endpoint
+        for i in {1..5}; do
+          echo "Attempt $i: Testing API endpoint..."
+          if curl -f -s "${{ steps.get_url.outputs.container_url }}/api" > /dev/null; then
+            echo "✅ API endpoint is responding"
+            break
+          elif [ $i -eq 5 ]; then
+            echo "⚠️  API endpoint not responding after 5 attempts"
+          else
+            echo "Waiting 30 seconds before retry..."
+            sleep 30
+          fi
+        done
+
+  post-deployment:
+    runs-on: ubuntu-latest
+    needs: deploy-container
+    name: Post-Deployment Tasks
+    
+    steps:
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Get deployment info
+      run: |
+        echo "=== Deployment Summary ==="
+        az containerapp show \
+          --name ${{ github.event.inputs.container_name }} \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --query "{Name:name, Status:properties.runningStatus, URL:properties.configuration.ingress.fqdn}" \
+          --output table
+
+    - name: Show container logs
+      run: |
+        echo "=== Recent Container Logs ==="
+        az containerapp logs show \
+          --name ${{ github.event.inputs.container_name }} \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --tail 20
+
+    - name: Create deployment record
+      run: |
+        echo "=== Deployment Record ===" > deployment-record.txt
+        echo "Timestamp: $(date)" >> deployment-record.txt
+        echo "Container: ${{ github.event.inputs.container_name }}" >> deployment-record.txt
+        echo "Environment: ${{ github.event.inputs.environment }}" >> deployment-record.txt
+        echo "Image: chatwoot/chatwoot:latest" >> deployment-record.txt
+        echo "Commit: ${{ github.sha }}" >> deployment-record.txt
+        echo "Workflow: ${{ github.run_id }}" >> deployment-record.txt
+        
+        CONTAINER_URL=$(az containerapp show \
+          --name ${{ github.event.inputs.container_name }} \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --query "properties.configuration.ingress.fqdn" \
+          --output tsv)
+        echo "URL: https://$CONTAINER_URL" >> deployment-record.txt
+        
+        cat deployment-record.txt
+
+    - name: Notify deployment completion
+      run: |
+        CONTAINER_URL=$(az containerapp show \
+          --name ${{ github.event.inputs.container_name }} \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --query "properties.configuration.ingress.fqdn" \
+          --output tsv)
+        
+        echo "🚀 Deployment completed successfully!"
+        echo "📍 Container: ${{ github.event.inputs.container_name }}"
+        echo "🌐 URL: https://$CONTAINER_URL"
+        echo "🎯 Environment: ${{ github.event.inputs.environment }}"
+        echo ""
+        echo "Next steps:"
+        echo "1. Test the application at the URL above"
+        echo "2. Set up initial admin user if needed"
+        echo "3. Configure additional settings through the UI" 
