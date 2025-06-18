@@ -43,8 +43,8 @@ jobs:
         run: |
           echo "Building fresh container image with tag: ${{ env.IMAGE_TAG }}"
           
-          # Build the image with environment-specific configuration using Azure Dockerfile
-          docker build -f Dockerfile.azure -t ${{ env.AZURE_CONTAINER_REGISTRY }}/chatwoot:${{ env.IMAGE_TAG }} \
+          # Build the image with simple Dockerfile for reliable deployment
+          docker build -f Dockerfile.simple -t ${{ env.AZURE_CONTAINER_REGISTRY }}/chatwoot:${{ env.IMAGE_TAG }} \
             --build-arg RAILS_ENV=${{ github.event.inputs.environment }} \
             .
           
@@ -119,8 +119,8 @@ jobs:
             --max-replicas 2 \
             --cpu 0.75 \
             --memory 1.5Gi \
-            --command "/bin/sh" \
-            --args "-c" "bundle exec rails db:prepare && bundle exec rails server -b 0.0.0.0 -p 3000" \
+            --command "bundle" \
+            --args "exec" "rails" "server" "-b" "0.0.0.0" "-p" "3000" \
             --env-vars \
               RAILS_ENV="$RAILS_ENV" \
               DATABASE_URL="$DATABASE_URL" \
