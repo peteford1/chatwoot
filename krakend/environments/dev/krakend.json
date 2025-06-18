@@ -1,0 +1,91 @@
+{
+  "$schema": "https://www.krakend.io/schema/v2.4/krakend.json",
+  "version": 3,
+  "name": "VoiceLink AI Gateway - Development Environment",
+  "timeout": "30s",
+  "cache_ttl": "300s",
+  "port": 8080,
+  "extra_config": {
+    "router": {
+      "return_error_msg": true
+    },
+    "security/cors": {
+      "allow_origins": [
+        "http://localhost:3000",
+        "https://localhost:3000",
+        "https://*.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+      ],
+      "allow_methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+      "allow_headers": [
+        "Content-Type",
+        "Authorization", 
+        "X-User-ID",
+        "X-User-Role",
+        "X-Website-Token",
+        "User-Agent",
+        "Origin",
+        "Accept"
+      ],
+      "expose_headers": ["*"],
+      "allow_credentials": true,
+      "max_age": "12h"
+    }
+  },
+  "endpoints": [
+    {
+      "endpoint": "/health",
+      "method": "GET",
+      "output_encoding": "json",
+      "extra_config": {
+        "proxy": {
+          "static": {
+            "data": {
+              "status": "ok",
+              "service": "krakend-gateway-dev",
+              "environment": "development",
+              "backend": "localhost:3000",
+              "timestamp": "{{.now}}"
+            },
+            "strategy": "always"
+          }
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/",
+          "method": "GET",
+          "host": ["https://httpbin.org"],
+          "disable_host_sanitize": false
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/v1/accounts/{account_id}/conversations",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Content-Type",
+        "Authorization",
+        "X-User-ID", 
+        "X-User-Role",
+        "User-Agent",
+        "Accept"
+      ],
+      "backend": [
+        {
+          "url_pattern": "/api/v1/accounts/{account_id}/conversations",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "http://localhost:3000"
+          ],
+          "extra_config": {
+            "backend/http": {
+              "return_error_code": true
+            }
+          }
+        }
+      ]
+    }
+  ]
+} 

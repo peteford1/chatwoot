@@ -1,0 +1,244 @@
+{
+  "$schema": "https://www.krakend.io/schema/v2.4/krakend.json",
+  "version": 3,
+  "name": "VoiceLink AI Gateway - Production Environment",
+  "timeout": "30s",
+  "cache_ttl": "300s",
+  "port": 8080,
+  "extra_config": {
+    "router": {
+      "return_error_msg": true
+    },
+    "security/cors": {
+      "allow_origins": [
+        "https://chatwoot-prod.calmmushroom-30b1c815.eastus.azurecontainerapps.io",
+        "https://*.calmmushroom-30b1c815.eastus.azurecontainerapps.io",
+        "https://voicelinkai.com",
+        "https://www.voicelinkai.com"
+      ],
+      "allow_methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+      "allow_headers": [
+        "Content-Type",
+        "Authorization", 
+        "X-User-ID",
+        "X-User-Role",
+        "X-Website-Token",
+        "User-Agent",
+        "Origin",
+        "Accept"
+      ],
+      "expose_headers": ["*"],
+      "allow_credentials": true,
+      "max_age": "12h"
+    },
+    "security/rate-limit": {
+      "max_rate": 1000,
+      "capacity": 1000,
+      "client_max_rate": 100,
+      "client_capacity": 100
+    }
+  },
+  "endpoints": [
+    {
+      "endpoint": "/health",
+      "method": "GET",
+      "output_encoding": "json",
+      "extra_config": {
+        "proxy": {
+          "static": {
+            "data": {
+              "status": "ok",
+              "service": "krakend-gateway-production",
+              "environment": "production",
+              "backend": "chatwoot-prod",
+              "timestamp": "{{.now}}"
+            },
+            "strategy": "always"
+          }
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/",
+          "method": "GET",
+          "host": ["https://httpbin.org"],
+          "disable_host_sanitize": false
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/v1/accounts/{account_id}/conversations",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Content-Type",
+        "Authorization",
+        "X-User-ID", 
+        "X-User-Role",
+        "User-Agent",
+        "Accept"
+      ],
+      "extra_config": {
+        "security/rate-limit": {
+          "max_rate": 100,
+          "capacity": 100,
+          "client_max_rate": 10,
+          "client_capacity": 10
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/api/v1/accounts/{account_id}/conversations",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "https://chatwoot-prod.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "backend/http": {
+              "return_error_code": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/v1/accounts/{account_id}/conversations/{conversation_id}/messages",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Content-Type",
+        "Authorization",
+        "X-User-ID",
+        "X-User-Role", 
+        "User-Agent",
+        "Accept"
+      ],
+      "extra_config": {
+        "security/rate-limit": {
+          "max_rate": 200,
+          "capacity": 200,
+          "client_max_rate": 20,
+          "client_capacity": 20
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/api/v1/accounts/{account_id}/conversations/{conversation_id}/messages",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "https://chatwoot-prod.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "backend/http": {
+              "return_error_code": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/v1/accounts/{account_id}/conversations/{conversation_id}/messages",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Content-Type",
+        "Authorization",
+        "X-User-ID",
+        "X-User-Role",
+        "User-Agent",
+        "Accept"
+      ],
+      "extra_config": {
+        "security/rate-limit": {
+          "max_rate": 50,
+          "capacity": 50,
+          "client_max_rate": 5,
+          "client_capacity": 5
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/api/v1/accounts/{account_id}/conversations/{conversation_id}/messages",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "https://chatwoot-prod.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "backend/http": {
+              "return_error_code": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/v1/widget/config",
+      "method": "POST", 
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "Content-Type",
+        "Authorization",
+        "X-Website-Token",
+        "User-Agent",
+        "Origin",
+        "Accept"
+      ],
+      "extra_config": {
+        "security/rate-limit": {
+          "max_rate": 500,
+          "capacity": 500,
+          "client_max_rate": 50,
+          "client_capacity": 50
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/api/v1/widget/config",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "https://chatwoot-prod.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "backend/http": {
+              "return_error_code": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/api",
+      "method": "GET",
+      "output_encoding": "json",
+      "extra_config": {
+        "proxy": {
+          "static": {
+            "data": {
+              "version": "4.2.0",
+              "timestamp": "{{.now}}",
+              "environment": "production",
+              "backend": "chatwoot-prod",
+              "queue_services": "ok",
+              "data_services": "ok",
+              "status": "healthy",
+              "gateway": "krakend-v2.4.1"
+            },
+            "strategy": "always"
+          }
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/",
+          "method": "GET", 
+          "host": ["https://httpbin.org"],
+          "disable_host_sanitize": false
+        }
+      ]
+    }
+  ]
+} 

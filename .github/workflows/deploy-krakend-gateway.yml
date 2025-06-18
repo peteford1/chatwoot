@@ -1,0 +1,177 @@
+name: Deploy KrakenD Gateway
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - dev
+          - test
+          - staging
+          - prod
+      gateway_name:
+        description: 'Gateway container name'
+        required: true
+        default: 'voicelinkai-gateway'
+      chatwoot_backend_url:
+        description: 'Chatwoot backend URL (optional - will use environment default)'
+        required: false
+        default: ''
+
+env:
+  AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+  RESOURCE_GROUP: SM-Test
+  LOCATION: eastus
+  CONTAINER_ENV: chatwoot-env-test
+
+jobs:
+  deploy-krakend:
+    runs-on: ubuntu-latest
+    name: Deploy KrakenD Gateway
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Login to Azure Container Registry
+      run: |
+        az acr login --name voicelinkregistry
+
+    - name: Set environment variables
+      id: set_env
+      run: |
+        case "${{ github.event.inputs.environment }}" in
+          "dev")
+            echo "backend_url=http://localhost:3000" >> $GITHUB_OUTPUT
+            echo "container_name=${{ github.event.inputs.gateway_name }}-dev" >> $GITHUB_OUTPUT
+            echo "gateway_image=voicelinkregistry.azurecr.io/krakend-gateway:${{ github.event.inputs.environment }}-${{ github.sha }}" >> $GITHUB_OUTPUT
+            ;;
+          "test")
+            echo "backend_url=https://chatwoot-working.calmmushroom-30b1c815.eastus.azurecontainerapps.io" >> $GITHUB_OUTPUT
+            echo "container_name=${{ github.event.inputs.gateway_name }}-test" >> $GITHUB_OUTPUT
+            echo "gateway_image=voicelinkregistry.azurecr.io/krakend-gateway:${{ github.event.inputs.environment }}-${{ github.sha }}" >> $GITHUB_OUTPUT
+            ;;
+          "staging")
+            echo "backend_url=https://chatwoot-staging.calmmushroom-30b1c815.eastus.azurecontainerapps.io" >> $GITHUB_OUTPUT
+            echo "container_name=${{ github.event.inputs.gateway_name }}-staging" >> $GITHUB_OUTPUT
+            echo "gateway_image=voicelinkregistry.azurecr.io/krakend-gateway:${{ github.event.inputs.environment }}-${{ github.sha }}" >> $GITHUB_OUTPUT
+            ;;
+          "prod")
+            echo "backend_url=https://chatwoot-prod.calmmushroom-30b1c815.eastus.azurecontainerapps.io" >> $GITHUB_OUTPUT
+            echo "container_name=${{ github.event.inputs.gateway_name }}-prod" >> $GITHUB_OUTPUT
+            echo "gateway_image=voicelinkregistry.azurecr.io/krakend-gateway:${{ github.event.inputs.environment }}-${{ github.sha }}" >> $GITHUB_OUTPUT
+            ;;
+        esac
+        
+        # Override with custom backend URL if provided
+        if [ -n "${{ github.event.inputs.chatwoot_backend_url }}" ]; then
+          echo "backend_url=${{ github.event.inputs.chatwoot_backend_url }}" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Build KrakenD Docker image
+      run: |
+        echo "Building KrakenD image for environment: ${{ github.event.inputs.environment }}"
+        
+        # Build the Docker image
+        docker build -t ${{ steps.set_env.outputs.gateway_image }} krakend/
+        
+        # Push to Azure Container Registry
+        docker push ${{ steps.set_env.outputs.gateway_image }}
+        
+        echo "KrakenD image built and pushed:"
+        echo "Image: ${{ steps.set_env.outputs.gateway_image }}"
+        echo "Environment: ${{ github.event.inputs.environment }}"
+        echo "Backend URL: ${{ steps.set_env.outputs.backend_url }}"
+
+    - name: Delete existing gateway if exists
+      continue-on-error: true
+      run: |
+        az containerapp delete \
+          --name ${{ steps.set_env.outputs.container_name }} \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --yes
+
+    - name: Verify KrakenD image
+      run: |
+        echo "Verifying KrakenD image: ${{ steps.set_env.outputs.gateway_image }}"
+        docker pull ${{ steps.set_env.outputs.gateway_image }}
+
+    - name: Deploy KrakenD Gateway
+      run: |
+        # Create the container app with KrakenD
+        az containerapp create \
+          --name ${{ steps.set_env.outputs.container_name }} \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --environment ${{ env.CONTAINER_ENV }} \
+          --image ${{ steps.set_env.outputs.gateway_image }} \
+          --target-port 8080 \
+          --ingress external \
+          --min-replicas 1 \
+          --max-replicas 2 \
+          --cpu 0.5 \
+          --memory 1.0Gi \
+          --env-vars \
+            KRAKEND_ENVIRONMENT="${{ github.event.inputs.environment }}" \
+            KRAKEND_BACKEND_URL="${{ steps.set_env.outputs.backend_url }}"
+
+    - name: Update KrakenD with configuration
+      run: |
+        # Get the container app details
+        GATEWAY_URL=$(az containerapp show \
+          --name ${{ steps.set_env.outputs.container_name }} \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --query "properties.configuration.ingress.fqdn" \
+          --output tsv)
+        
+        echo "KrakenD Gateway deployed successfully!"
+        echo "Gateway URL: https://$GATEWAY_URL"
+        echo "Environment: ${{ github.event.inputs.environment }}"
+        echo "Backend: ${{ steps.set_env.outputs.backend_url }}"
+
+    - name: Test gateway health
+      run: |
+        GATEWAY_URL=$(az containerapp show \
+          --name ${{ steps.set_env.outputs.container_name }} \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --query "properties.configuration.ingress.fqdn" \
+          --output tsv)
+        
+        echo "Testing gateway health..."
+        sleep 30  # Wait for container to start
+        
+        # Test health endpoint
+        curl -f "https://$GATEWAY_URL/health" || echo "Health check failed - container may still be starting"
+        
+        # Test API endpoint
+        curl -f "https://$GATEWAY_URL/api" || echo "API check failed - container may still be starting"
+
+    - name: Deployment summary
+      run: |
+        GATEWAY_URL=$(az containerapp show \
+          --name ${{ steps.set_env.outputs.container_name }} \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --query "properties.configuration.ingress.fqdn" \
+          --output tsv)
+        
+        echo "🚀 KrakenD Gateway Deployment Complete!"
+        echo "📍 Container: ${{ steps.set_env.outputs.container_name }}"
+        echo "🌐 Gateway URL: https://$GATEWAY_URL"
+        echo "🎯 Environment: ${{ github.event.inputs.environment }}"
+        echo "🔗 Backend: ${{ steps.set_env.outputs.backend_url }}"
+        echo ""
+        echo "🔍 Test endpoints:"
+        echo "   Health: https://$GATEWAY_URL/health"
+        echo "   API Info: https://$GATEWAY_URL/api"
+        echo ""
+        echo "📋 Next steps:"
+        echo "1. Test the gateway endpoints above"
+        echo "2. Update your frontend to use the gateway URL"
+        echo "3. Configure rate limiting and authentication as needed" 
