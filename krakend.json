@@ -1003,6 +1003,122 @@
       ]
     },
     {
+      "endpoint": "/super_admin/{path}",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "*"
+      ],
+      "extra_config": {
+        "security/policies": {
+          "max_conn": 50,
+          "max_conn_per_ip": 10
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/super_admin/{path}",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "backend/http": {
+              "return_error_code": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/super_admin/{path}",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "*"
+      ],
+      "extra_config": {
+        "security/policies": {
+          "max_conn": 50,
+          "max_conn_per_ip": 10
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/super_admin/{path}",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "backend/http": {
+              "return_error_code": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/super_admin",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "*"
+      ],
+      "extra_config": {
+        "security/policies": {
+          "max_conn": 50,
+          "max_conn_per_ip": 10
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/super_admin",
+          "encoding": "no-op",
+          "method": "GET",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "backend/http": {
+              "return_error_code": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/super_admin",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "headers_to_pass": [
+        "*"
+      ],
+      "extra_config": {
+        "security/policies": {
+          "max_conn": 50,
+          "max_conn_per_ip": 10
+        }
+      },
+      "backend": [
+        {
+          "url_pattern": "/super_admin",
+          "encoding": "no-op",
+          "method": "POST",
+          "host": [
+            "https://chatwoot-backend-test.calmmushroom-30b1c815.eastus.azurecontainerapps.io"
+          ],
+          "extra_config": {
+            "backend/http": {
+              "return_error_code": true
+            }
+          }
+        }
+      ]
+    },
+    {
       "endpoint": "/app/{path}",
       "method": "GET",
       "output_encoding": "no-op",
